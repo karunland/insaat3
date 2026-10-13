@@ -1,0 +1,32 @@
+---
+/**
+ * Dekoratif ölçü çizgisi:  |<———— etiket ————>|
+ * Teknik çizim dilinin ana motifi. Ekran okuyuculardan gizlidir.
+ */
+interface Props {
+  label?: string;
+  class?: string;
+}
+const { label, class: className } = Astro.props;
+---
+
+<div class:list={['flex items-center gap-3 font-mono text-[0.7rem] tracking-widest uppercase', className]} aria-hidden="true">
+  <span class="h-3 w-px bg-current"></span>
+  <span class="relative h-px flex-1 bg-current">
+    <span class="absolute top-1/2 left-0 size-1.5 -translate-y-1/2 rotate-45 border-b border-l border-current"></span>
+    {
+      !label && (
+        <span class="absolute top-1/2 right-0 size-1.5 -translate-y-1/2 rotate-45 border-t border-r border-current" />
+      )
+    }
+  </span>
+  {label && <span class="shrink-0">{label}</span>}
+  {
+    label && (
+      <span class="relative h-px flex-1 bg-current">
+        <span class="absolute top-1/2 right-0 size-1.5 -translate-y-1/2 rotate-45 border-t border-r border-current" />
+      </span>
+    )
+  }
+  <span class="h-3 w-px bg-current"></span>
+</div>

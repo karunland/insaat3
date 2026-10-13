@@ -1,0 +1,21 @@
+---
+/** JS kapalıyken Web3Forms gönderiminden sonra yönlenilen sayfa (noindex). */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import type { Lang } from '@/i18n/config';
+import { path, routes } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<BaseLayout lang={lang} alternates={routes.thankYou} title={t.thankYou.title} description={t.thankYou.description} noindex>
+  <PageHeader eyebrow={t.contact.eyebrow} title={t.thankYou.title} lead={t.thankYou.text}>
+    <a slot="actions" href={path('home', lang)} class="btn-dark">{t.thankYou.back}</a>
+  </PageHeader>
+</BaseLayout>

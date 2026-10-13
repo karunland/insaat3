@@ -1,0 +1,27 @@
+---
+/**
+ * Statik hostlar (Netlify, Cloudflare Pages) tek bir 404.html sunar;
+ * bu yüzden sayfa iki dilli: Türkçe ana metin + İngilizce kısa karşılık.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { routes } from '@/i18n/routes';
+---
+
+<BaseLayout lang="tr" alternates={routes.home} title="Sayfa bulunamadı" noindex>
+  <section class="blueprint-grid border-rule border-b">
+    <div class="container-site py-24 lg:py-36">
+      <p class="eyebrow text-signal-700">404</p>
+      <h1 class="mt-5 text-5xl lg:text-7xl" style="font-stretch: 75%">Sayfa bulunamadı.</h1>
+      <p class="text-concrete-700 mt-6 max-w-xl text-lg">
+        Aradığınız sayfa taşınmış ya da kaldırılmış olabilir.
+      </p>
+      <p class="text-concrete-600 mt-2 max-w-xl" lang="en">
+        Page not found. The page you are looking for may have been moved or removed.
+      </p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href={routes.home.tr} class="btn-dark">Ana sayfa</a>
+        <a href={routes.home.en} class="btn-outline" lang="en" hreflang="en">Home (English)</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

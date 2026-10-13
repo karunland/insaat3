@@ -1,0 +1,65 @@
+---
+/**
+ * Web3Forms ile çalışan form kabuğu: gizli servis alanları, bot tuzağı ve durum mesajı.
+ *
+ * - JS varsa: src/scripts/web3forms.ts formu fetch ile gönderir, sonucu sayfada gösterir.
+ * - JS yoksa: form doğrudan Web3Forms'a POST edilir, ardından teşekkür sayfasına yönlenir.
+ *
+ * Erişim anahtarı: .env → PUBLIC_WEB3FORMS_ACCESS_KEY
+ */
+import { PUBLIC_WEB3FORMS_ACCESS_KEY } from 'astro:env/client';
+import type { Lang } from '@/i18n/config';
+import { path } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  /** Gelen e-postanın konu satırı. */
+  subject: string;
+  id?: string;
+  class?: string;
+  /** Çok adımlı form (src/scripts/form-stepper.ts). */
+  stepper?: boolean;
+}
+
+const { lang, subject, id, class: className, stepper = false } = Astro.props;
+const t = useTranslations(lang);
+const accessKey = PUBLIC_WEB3FORMS_ACCESS_KEY ?? '';
+const redirect = new URL(path('thankYou', lang), Astro.site).href;
+
+if (!accessKey && import.meta.env.DEV) {
+  console.warn('[forms] PUBLIC_WEB3FORMS_ACCESS_KEY tanımlı değil; formlar gönderim yapamaz. Bkz. .env.example');
+}
+---
+
+<form
+  id={id}
+  action="https://api.web3forms.com/submit"
+  method="POST"
+  class={className}
+  data-web3forms
+  data-stepper={stepper ? '' : undefined}
+  data-msg-success={t.forms.success}
+  data-msg-error={t.forms.error}
+  data-msg-not-configured={t.forms.notConfigured}
+  data-msg-sending={t.forms.sending}
+>
+  <input type="hidden" name="access_key" value={accessKey} />
+  <input type="hidden" name="subject" value={subject} />
+  <input type="hidden" name="from_name" value="MAKSEF web sitesi" />
+  <input type="hidden" name="redirect" value={redirect} />
+  <input type="hidden" name="Dil" value={lang.toUpperCase()} />
+  <!-- Bot tuzağı: insanlar görmez, botlar doldurur. -->
+  <input type="checkbox" name="botcheck" class="hidden" style="display: none" tabindex="-1" autocomplete="off" />
+
+  <slot />
+
+  <div class="mt-6 empty:hidden" role="status" aria-live="polite" data-form-status></div>
+</form>
+
+<script>
+  import { initWeb3Forms } from '@/scripts/web3forms';
+  import { initFormSteppers } from '@/scripts/form-stepper';
+  initFormSteppers();
+  initWeb3Forms();
+</script>

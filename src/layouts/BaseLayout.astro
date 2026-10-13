@@ -1,0 +1,44 @@
+---
+import '@/styles/global.css';
+import { languages, type Lang } from '@/i18n/config';
+import type { Alternates, RouteKey } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import Seo, { type SeoProps } from '@/components/layout/Seo.astro';
+import Header from '@/components/layout/Header.astro';
+import Footer from '@/components/layout/Footer.astro';
+
+interface Props extends SeoProps {
+  lang: Lang;
+  alternates: Alternates;
+  activeNav?: RouteKey;
+}
+
+const { lang, alternates, activeNav, ...seo } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<!doctype html>
+<html lang={languages[lang].htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5f2" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <Seo lang={lang} alternates={alternates} {...seo} />
+  </head>
+  <body class="flex min-h-dvh flex-col">
+    <a
+      href="#main"
+      class="bg-ink text-paper sr-only z-50 px-4 py-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+    >
+      {t.a11y.skipToContent}
+    </a>
+    <Header lang={lang} alternates={alternates} activeNav={activeNav} />
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
+      <slot />
+    </main>
+    <Footer lang={lang} sheetName={seo.title ?? t.nav.home} />
+  </body>
+</html>

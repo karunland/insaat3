@@ -1,0 +1,112 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import DimensionLine from '@/components/ui/DimensionLine.astro';
+import ProjectList from '@/components/projects/ProjectList.astro';
+import RenewalForm from '@/components/forms/RenewalForm.astro';
+import type { Lang } from '@/i18n/config';
+import { RENEWAL_FORM_ID, routes } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { getProjects } from '@/lib/projects';
+import { site, telHref } from '@/config/site';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const projects = await getProjects(lang, (p) => p.data.category === 'kentsel-donusum');
+---
+
+<BaseLayout
+  lang={lang}
+  alternates={routes.urbanRenewal}
+  title={t.urbanRenewal.title}
+  description={t.urbanRenewal.description}
+>
+  <PageHeader eyebrow={t.urbanRenewal.eyebrow} title={t.urbanRenewal.title} lead={t.urbanRenewal.lead}>
+    <a slot="actions" href={`#${RENEWAL_FORM_ID}`} class="btn-primary">
+      {t.urbanRenewal.applyButton}
+      <span aria-hidden="true">↓</span>
+    </a>
+  </PageHeader>
+
+  <!-- Süreç -->
+  <section class="container-site py-20 lg:py-28" aria-labelledby="process-title">
+    <SectionHeading index={1} eyebrow={t.home.processEyebrow} title={t.urbanRenewal.processTitle} id="process-title" />
+    <ol class="mt-12">
+      {
+        t.urbanRenewal.process.map((step, i) => (
+          <li class="border-rule grid gap-3 border-t py-7 md:grid-cols-12 md:gap-8">
+            <span class="text-signal-600 font-mono text-3xl font-medium md:col-span-2">{String(i + 1).padStart(2, '0')}</span>
+            <h3 class="text-2xl md:col-span-4" style="font-stretch: 82%">
+              {step.title}
+            </h3>
+            <p class="text-concrete-700 text-lg leading-relaxed md:col-span-6">{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- Projeler -->
+  {
+    projects.length > 0 && (
+      <section class="bg-concrete-100 border-rule border-y" aria-labelledby="renewal-projects-title">
+        <div class="container-site py-20 lg:py-28">
+          <SectionHeading index={2} eyebrow={t.nav.projects} title={t.urbanRenewal.projectsTitle} id="renewal-projects-title" class="mb-12" />
+          <ProjectList lang={lang} projects={projects} filters={['status']} />
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Başvuru formu -->
+  <section id={RENEWAL_FORM_ID} class="blueprint-grid border-rule border-b" aria-labelledby="form-title">
+    <div class="container-site grid gap-12 py-20 lg:grid-cols-12 lg:py-28">
+      <div class="lg:col-span-4">
+        <SectionHeading
+          index={3}
+          eyebrow={t.urbanRenewal.formEyebrow}
+          title={t.urbanRenewal.formTitle}
+          lead={t.urbanRenewal.formLead}
+          id="form-title"
+        />
+        <DimensionLine class="text-concrete-400 mt-10" />
+        <p class="mt-6">
+          <span class="eyebrow text-concrete-600 block">{t.cta.callUs}</span>
+          <a href={telHref(site.phone)} class="link mt-1 inline-block text-2xl font-semibold">{site.phone}</a>
+        </p>
+      </div>
+      <div class="border-ink bg-paper border p-6 sm:p-10 lg:col-span-7 lg:col-start-6">
+        <RenewalForm lang={lang} />
+      </div>
+    </div>
+  </section>
+
+  <!-- SSS -->
+  <section class="container-site py-20 lg:py-28" aria-labelledby="faq-title">
+    <div class="grid gap-10 lg:grid-cols-12">
+      <h2 id="faq-title" class="text-3xl lg:col-span-4 lg:text-4xl" style="font-stretch: 80%">
+        {t.urbanRenewal.faqTitle}
+      </h2>
+      <div class="border-rule border-t lg:col-span-8">
+        {
+          t.urbanRenewal.faq.map((item) => (
+            <details class="group border-rule border-b">
+              <summary class="hover:text-signal-700 flex min-h-16 cursor-pointer list-none items-center justify-between gap-6 py-5 text-lg font-semibold [&::-webkit-details-marker]:hidden">
+                {item.q}
+                <span class="text-signal-600 font-mono text-2xl transition-transform group-open:rotate-45" aria-hidden="true">
+                  +
+                </span>
+              </summary>
+              <p class="text-concrete-700 max-w-[65ch] pb-6 text-lg leading-relaxed">{item.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>

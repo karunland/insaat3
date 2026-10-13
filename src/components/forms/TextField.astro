@@ -1,0 +1,47 @@
+---
+/**
+ * Etiketli metin alanı (input veya textarea).
+ * `name`, Web3Forms e-postasında alan başlığı olarak görünür — bu yüzden
+ * firma tarafının okuyacağı dilde (Türkçe) ve okunur olmalı.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import type { Lang } from '@/i18n/config';
+import { useTranslations } from '@/i18n/utils';
+
+type Props = {
+  lang: Lang;
+  name: string;
+  label: string;
+  hint?: string;
+  multiline?: boolean;
+  class?: string;
+} & Omit<HTMLAttributes<'input'>, 'name' | 'class'>;
+
+const { lang, name, label, hint, multiline = false, class: className, required, id: idProp, ...attrs } = Astro.props;
+const t = useTranslations(lang);
+const id = idProp ?? `f-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Math.random().toString(36).slice(2, 7)}`;
+const hintId = hint ? `${id}-hint` : undefined;
+---
+
+<div class={className}>
+  <label for={id} class="field-label">
+    {label}
+    {
+      required ? (
+        <span class="text-signal-700" aria-hidden="true" title={t.forms.required}>
+          *
+        </span>
+      ) : (
+        <span class="text-concrete-500 font-normal"> ({t.forms.optional})</span>
+      )
+    }
+  </label>
+  {
+    multiline ? (
+      <textarea id={id} name={name} required={required} aria-describedby={hintId} rows={5} class="field-input min-h-32 resize-y" />
+    ) : (
+      <input id={id} name={name} required={required} aria-describedby={hintId} class="field-input" {...attrs} />
+    )
+  }
+  {hint && <p id={hintId} class="field-hint">{hint}</p>}
+</div>

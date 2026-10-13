@@ -1,0 +1,29 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import ContactCta from '@/components/ui/ContactCta.astro';
+import ProjectList from '@/components/projects/ProjectList.astro';
+import type { Lang } from '@/i18n/config';
+import { routes } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { getProjects } from '@/lib/projects';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const projects = await getProjects(lang);
+---
+
+<BaseLayout lang={lang} alternates={routes.projects} title={t.projects.title} description={t.projects.description}>
+  <PageHeader eyebrow={t.projects.eyebrow} title={t.projects.title} lead={t.projects.lead} />
+
+  <section class="container-site py-14 lg:py-20">
+    <h2 class="sr-only">{t.filters.legend}</h2>
+    <ProjectList lang={lang} projects={projects} filters={['category', 'status']} eagerCount={3} />
+  </section>
+
+  <ContactCta lang={lang} />
+</BaseLayout>

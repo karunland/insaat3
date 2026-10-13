@@ -1,0 +1,106 @@
+---
+/**
+ * Alt bilgi. En alttaki şerit, teknik çizimlerdeki antet (title block) gibi tasarlandı.
+ */
+import type { Lang } from '@/i18n/config';
+import { path, type RouteKey } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { site, telHref } from '@/config/site';
+import Logo from './Logo.astro';
+
+interface Props {
+  lang: Lang;
+  /** Antette "Pafta" hücresinde görünen sayfa adı. */
+  sheetName: string;
+}
+
+const { lang, sheetName } = Astro.props;
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+
+const links: { key: RouteKey; label: string }[] = [
+  { key: 'about', label: t.nav.about },
+  { key: 'contracting', label: t.nav.contracting },
+  { key: 'urbanRenewal', label: t.nav.urbanRenewal },
+  { key: 'projects', label: t.nav.projects },
+  { key: 'contact', label: t.nav.contact },
+];
+
+const social = Object.entries(site.social).filter(([, url]) => url);
+const addressLine = [site.address.street, site.address.district, site.address.city].filter(Boolean).join(', ');
+---
+
+<footer class="bg-concrete-900 text-concrete-200 blueprint-grid-inverse">
+  <div class="container-site grid gap-12 py-16 md:grid-cols-12 lg:py-20">
+    <div class="md:col-span-5">
+      <a href={path('home', lang)} class="text-paper inline-block" aria-label={t.a11y.homeLink}>
+        <Logo />
+      </a>
+      <p class="text-concrete-300 mt-6 max-w-sm text-lg">{t.footer.tagline}</p>
+    </div>
+
+    <nav aria-label={t.a11y.footerNav} class="md:col-span-3">
+      <ul class="space-y-1">
+        {
+          links.map((link) => (
+            <li>
+              <a href={path(link.key, lang)} class="hover:text-paper inline-flex min-h-10 items-center transition-colors">
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <address class="space-y-3 not-italic md:col-span-4">
+      <p>
+        <span class="eyebrow text-concrete-400 block">{t.contact.phone}</span>
+        <a href={telHref(site.phone)} class="text-paper hover:text-signal-300 text-lg transition-colors">{site.phone}</a>
+      </p>
+      <p>
+        <span class="eyebrow text-concrete-400 block">{t.contact.email}</span>
+        <a href={`mailto:${site.email}`} class="text-paper hover:text-signal-300 text-lg transition-colors">{site.email}</a>
+      </p>
+      <p>
+        <span class="eyebrow text-concrete-400 block">{t.contact.address}</span>
+        <span class="text-paper">{addressLine}</span>
+      </p>
+      {
+        social.length > 0 && (
+          <ul class="flex gap-4 pt-2">
+            {social.map(([name, url]) => (
+              <li>
+                <a href={url} class="hover:text-paper capitalize" rel="noopener" target="_blank">
+                  {name} <span class="sr-only">{t.a11y.opensInNewTab}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </address>
+  </div>
+
+  <!-- Antet -->
+  <div class="border-rule-inverse border-t">
+    <dl class="container-site divide-rule-inverse grid grid-cols-2 font-mono text-xs sm:grid-cols-4 sm:divide-x">
+      <div class="py-4 sm:pr-6">
+        <dt class="text-concrete-400 uppercase">{site.name}</dt>
+        <dd class="text-paper mt-1">© {year} {t.footer.rights}</dd>
+      </div>
+      <div class="py-4 sm:px-6">
+        <dt class="text-concrete-400 uppercase">{t.footer.sheet}</dt>
+        <dd class="text-paper mt-1 truncate">{sheetName}</dd>
+      </div>
+      <div class="py-4 sm:px-6">
+        <dt class="text-concrete-400 uppercase">{t.footer.scale}</dt>
+        <dd class="text-paper mt-1">1:1</dd>
+      </div>
+      <div class="py-4 sm:pl-6">
+        <dt class="text-concrete-400 uppercase">{t.footer.date}</dt>
+        <dd class="text-paper mt-1">{year}</dd>
+      </div>
+    </dl>
+  </div>
+</footer>

@@ -1,0 +1,135 @@
+---
+/**
+ * Kentsel dönüşüm ön başvuru formu (bina / arsa sahipleri için), 3 adım:
+ *   1. Mülk   2. Yapı   3. İletişim
+ * Adımlar src/scripts/form-stepper.ts ile yönetilir; JS yoksa tek sayfa form olarak çalışır.
+ */
+import type { Lang } from '@/i18n/config';
+import { ui } from '@/i18n/ui';
+import { format, useTranslations } from '@/i18n/utils';
+import Web3Form from './Web3Form.astro';
+import TextField from './TextField.astro';
+import ChoiceGroup from './ChoiceGroup.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang).forms;
+const r = t.renewal;
+// Gönderilen değerler Türkçe (e-postayı okuyan ekip için); etiketler sayfa dilinde.
+const trR = ui.tr.forms.renewal;
+
+function options<K extends string>(labels: Record<K, string>, values: Record<K, string>) {
+  return (Object.keys(labels) as K[]).map((key) => ({ value: values[key], label: labels[key] }));
+}
+
+const DISTRICTS = [
+  'Adalar', 'Arnavutköy', 'Ataşehir', 'Avcılar', 'Bağcılar', 'Bahçelievler', 'Bakırköy', 'Başakşehir',
+  'Bayrampaşa', 'Beşiktaş', 'Beykoz', 'Beylikdüzü', 'Beyoğlu', 'Büyükçekmece', 'Çatalca', 'Çekmeköy',
+  'Esenler', 'Esenyurt', 'Eyüpsultan', 'Fatih', 'Gaziosmanpaşa', 'Güngören', 'Kadıköy', 'Kağıthane',
+  'Kartal', 'Küçükçekmece', 'Maltepe', 'Pendik', 'Sancaktepe', 'Sarıyer', 'Silivri', 'Sultanbeyli',
+  'Sultangazi', 'Şile', 'Şişli', 'Tuzla', 'Ümraniye', 'Üsküdar', 'Zeytinburnu',
+];
+
+const steps = [r.step1, r.step2, r.step3];
+---
+
+<Web3Form lang={lang} subject="Web sitesi — kentsel dönüşüm ön başvurusu" id="kentsel-donusum-formu" stepper>
+  <ol class="mb-10 grid grid-cols-3 gap-2" data-step-indicator hidden>
+    {
+      steps.map((label, i) => (
+        <li class="group" data-state={i === 0 ? 'current' : 'todo'}>
+          <span class="bg-concrete-300 group-data-[state=current]:bg-signal-600 group-data-[state=done]:bg-ink block h-1 transition-colors" />
+          <span class="eyebrow text-concrete-500 group-data-[state=current]:text-ink group-data-[state=done]:text-concrete-700 mt-2 block">
+            {String(i + 1).padStart(2, '0')} · {label}
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="sr-only" aria-live="polite" data-step-progress data-template={t.stepOf}></p>
+
+  <!-- 1. Mülk -->
+  <fieldset data-step class="space-y-6">
+    <legend class="sr-only">{r.step1}</legend>
+    <h3 class="text-2xl focus:outline-none" tabindex="-1" data-step-title style="font-stretch: 85%">
+      {format(t.stepOf, { current: 1, total: 3 })} — {r.step1}
+    </h3>
+    <ChoiceGroup name="Başvuru sahibi" legend={r.role} options={options(r.roles, trR.roles)} required columns={4} />
+    <ChoiceGroup name="Mülk türü" legend={r.propertyType} options={options(r.propertyTypes, trR.propertyTypes)} required />
+    <div class="grid gap-5 sm:grid-cols-2">
+      <div>
+        <label for="renewal-district" class="field-label">
+          {r.district} <span class="text-signal-700" aria-hidden="true">*</span>
+        </label>
+        <select id="renewal-district" name="İlçe" required class="field-input">
+          <option value="">{t.select}</option>
+          {DISTRICTS.map((d) => <option value={d}>{d}</option>)}
+          <option value={trR.outsideIstanbul}>{r.outsideIstanbul}</option>
+        </select>
+      </div>
+      <TextField lang={lang} name="Ada / parsel" label={r.parcel} hint={r.parcelHint} />
+      <TextField lang={lang} name="Mahalle / adres" label={r.address} required class="sm:col-span-2" autocomplete="street-address" />
+    </div>
+    <div class="flex justify-end" data-step-nav hidden>
+      <button type="button" class="btn-dark" data-step-next>{t.next} <span aria-hidden="true">→</span></button>
+    </div>
+  </fieldset>
+
+  <!-- 2. Yapı -->
+  <fieldset data-step class="mt-12 space-y-6">
+    <legend class="sr-only">{r.step2}</legend>
+    <h3 class="text-2xl focus:outline-none" tabindex="-1" data-step-title style="font-stretch: 85%">
+      {format(t.stepOf, { current: 2, total: 3 })} — {r.step2}
+    </h3>
+    <div class="grid gap-5 sm:grid-cols-3">
+      <div>
+        <label for="renewal-age" class="field-label">
+          {r.buildingAge} <span class="text-signal-700" aria-hidden="true">*</span>
+        </label>
+        <select id="renewal-age" name="Yapım yılı" required class="field-input">
+          <option value="">{t.select}</option>
+          {options(r.ages, trR.ages).map((o) => <option value={o.value}>{o.label}</option>)}
+        </select>
+      </div>
+      <TextField lang={lang} name="Kat sayısı" type="number" min="1" max="60" inputmode="numeric" label={r.floors} />
+      <TextField lang={lang} name="Bağımsız bölüm sayısı" type="number" min="1" max="500" inputmode="numeric" label={r.units} hint={r.unitsHint} />
+    </div>
+    <ChoiceGroup name="Riskli yapı raporu" legend={r.riskReport} options={options(r.riskReports, trR.riskReports)} required columns={4} />
+    <ChoiceGroup name="Maliklerin durumu" legend={r.consensus} options={options(r.consensusOptions, trR.consensusOptions)} columns={3} />
+    <div class="flex justify-between gap-3" data-step-nav hidden>
+      <button type="button" class="btn-outline" data-step-back><span aria-hidden="true">←</span> {t.back}</button>
+      <button type="button" class="btn-dark" data-step-next>{t.next} <span aria-hidden="true">→</span></button>
+    </div>
+  </fieldset>
+
+  <!-- 3. İletişim -->
+  <fieldset data-step class="mt-12 space-y-6">
+    <legend class="sr-only">{r.step3}</legend>
+    <h3 class="text-2xl focus:outline-none" tabindex="-1" data-step-title style="font-stretch: 85%">
+      {format(t.stepOf, { current: 3, total: 3 })} — {r.step3}
+    </h3>
+    <div class="grid gap-5 sm:grid-cols-2">
+      <TextField lang={lang} name="name" label={t.name} required autocomplete="name" class="sm:col-span-2" />
+      <TextField lang={lang} name="Telefon" type="tel" label={t.phone} required autocomplete="tel" inputmode="tel" />
+      <TextField lang={lang} name="email" type="email" label={t.email} autocomplete="email" />
+    </div>
+    <ChoiceGroup name="Tercih edilen iletişim" legend={r.preferredContact} options={options(r.contactOptions, trR.contactOptions)} />
+    <TextField lang={lang} name="Not" label={r.note} multiline />
+
+    <label class="text-concrete-700 flex items-start gap-3 text-sm">
+      <input type="checkbox" name="KVKK onayı" value="Evet" required class="accent-signal-600 mt-0.5 size-5 shrink-0" />
+      <span>{t.consent}</span>
+    </label>
+
+    <div class="flex flex-wrap justify-between gap-3">
+      <button type="button" class="btn-outline" data-step-back data-step-nav hidden>
+        <span aria-hidden="true">←</span>
+        {t.back}
+      </button>
+      <button type="submit" class="btn-primary">{t.send} <span aria-hidden="true">→</span></button>
+    </div>
+  </fieldset>
+</Web3Form>

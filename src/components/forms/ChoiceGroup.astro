@@ -1,0 +1,34 @@
+---
+/**
+ * Radyo düğmesi grubu (fieldset + legend). Seçenekler kart görünümündedir.
+ * `value` firma tarafında okunacağı için Türkçe, `label` ise sayfa dilindedir.
+ */
+interface Props {
+  name: string;
+  legend: string;
+  options: { value: string; label: string }[];
+  required?: boolean;
+  columns?: 2 | 3 | 4;
+  class?: string;
+}
+
+const { name, legend, options, required = false, columns = 2, class: className } = Astro.props;
+const grid = { 2: 'sm:grid-cols-2', 3: 'sm:grid-cols-3', 4: 'sm:grid-cols-2 lg:grid-cols-4' }[columns];
+---
+
+<fieldset class={className}>
+  <legend class="field-label">
+    {legend}
+    {required && <span class="text-signal-700" aria-hidden="true">*</span>}
+  </legend>
+  <div class:list={['grid gap-2', grid]}>
+    {
+      options.map((option) => (
+        <label class="choice">
+          <input type="radio" name={name} value={option.value} required={required} />
+          {option.label}
+        </label>
+      ))
+    }
+  </div>
+</fieldset>

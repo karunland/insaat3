@@ -1,0 +1,106 @@
+---
+/**
+ * Proje ızgarası + isteğe bağlı filtreler (faaliyet alanı / durum).
+ *
+ * Filtreleme istemci tarafında, vanilla JS ile yapılır (src/scripts/project-filter.ts).
+ * JS yoksa filtre kontrolleri <noscript> stiliyle gizlenir ve tüm projeler listelenir.
+ * (Kontroller JS ile sonradan gösterilmez; böylece sayfa yüklenirken yerleşim kaymaz.)
+ * Seçimler URL'e yazılır (?category=…&status=…) — paylaşılabilir ve geri tuşuyla korunur.
+ */
+import { CATEGORIES, STATUSES } from '@/content.config';
+import type { Lang } from '@/i18n/config';
+import { format, useTranslations } from '@/i18n/utils';
+import type { Project } from '@/lib/projects';
+import ProjectCard from './ProjectCard.astro';
+
+type FilterKey = 'category' | 'status';
+
+interface Props {
+  lang: Lang;
+  projects: Project[];
+  filters?: FilterKey[];
+  headingLevel?: 'h2' | 'h3';
+  /** İlk N kartın görseli hemen yüklenir. */
+  eagerCount?: number;
+}
+
+const { lang, projects, filters = [], headingLevel = 'h3', eagerCount = 0 } = Astro.props;
+const t = useTranslations(lang);
+
+const groups = {
+  category: {
+    legend: t.filters.category,
+    options: CATEGORIES.filter((c) => projects.some((p) => p.data.category === c)).map((value) => ({
+      value,
+      label: t.categories[value],
+    })),
+  },
+  status: {
+    legend: t.filters.status,
+    options: STATUSES.filter((s) => projects.some((p) => p.data.status === s)).map((value) => ({
+      value,
+      label: t.statuses[value],
+    })),
+  },
+};
+
+// Tek seçenekli bir grubu filtre olarak göstermenin anlamı yok.
+const activeFilters = filters.filter((key) => groups[key].options.length > 1);
+---
+
+<div data-project-filter>
+  {
+    activeFilters.length > 0 && (
+      <div class="mb-10" data-filter-controls>
+        <div class="border-rule flex flex-col gap-6 border-y py-5 md:flex-row md:items-end md:justify-between">
+          <div class="flex flex-col gap-5 sm:flex-row sm:gap-10">
+            {activeFilters.map((key) => (
+              <fieldset>
+                <legend class="eyebrow text-concrete-600 mb-2.5">{groups[key].legend}</legend>
+                <div class="flex flex-wrap">
+                  {[{ value: '', label: t.filters.all }, ...groups[key].options].map((option, i) => (
+                    <label class="border-concrete-400 hover:bg-concrete-100 has-checked:bg-ink has-checked:text-paper has-checked:border-ink has-focus-visible:outline-signal-600 -ml-px inline-flex min-h-11 cursor-pointer items-center border px-4 text-sm font-medium transition-colors first:ml-0 has-focus-visible:z-10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2">
+                      <input type="radio" name={key} value={option.value} checked={i === 0} class="sr-only" />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+          <p class="eyebrow text-concrete-600" aria-live="polite" data-filter-count data-template={t.filters.showing}>
+            {format(t.filters.showing, { count: projects.length })}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  <ul class="grid gap-x-8 gap-y-14 sm:grid-cols-2 xl:grid-cols-3">
+    {
+      projects.map((project, i) => (
+        <li data-project data-category={project.data.category} data-status={project.data.status}>
+          <ProjectCard project={project} headingLevel={headingLevel} eager={i < eagerCount} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="border-concrete-400 border border-dashed p-10 text-center" data-filter-empty hidden>
+    <p class="text-concrete-700 text-lg">{t.filters.empty}</p>
+    <button type="button" class="btn-outline mt-5" data-filter-reset>{t.filters.reset}</button>
+  </div>
+</div>
+
+<noscript>
+  <style is:inline>
+    [data-filter-controls] {
+      display: none;
+    }
+  </style>
+</noscript>
+
+<script>
+  import { initProjectFilters } from '@/scripts/project-filter';
+  initProjectFilters();
+</script>

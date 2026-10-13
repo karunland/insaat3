@@ -1,0 +1,234 @@
+/*
+ * MAKSEF tasarım sistemi — "teknik çizim ve beton".
+ *
+ * Renkler beton tonlarından oluşur; tek vurgu rengi şantiye işaret turuncusu (signal).
+ * Teknik çizim dili: ince çizgiler, ızgara kâğıdı, köşe işaretleri, monospace ölçü notları.
+ * Köşeler keskin (border-radius yok).
+ */
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+@theme {
+  --font-sans: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  /* Beton skalası (sıcak gri) */
+  --color-concrete-50: #f6f5f2;
+  --color-concrete-100: #ecebe7;
+  --color-concrete-200: #dbd8d2;
+  --color-concrete-300: #c3bfb7;
+  --color-concrete-400: #9d988e;
+  --color-concrete-500: #6b665d;
+  --color-concrete-600: #5c5850;
+  --color-concrete-700: #45423c;
+  --color-concrete-800: #2d2b28;
+  --color-concrete-900: #1c1b19;
+  --color-concrete-950: #121110;
+
+  --color-paper: var(--color-concrete-50);
+  --color-ink: var(--color-concrete-900);
+
+  /* Vurgu: işaret turuncusu. 600 tonu kâğıt ve beton-100 zeminlerde ≥4.5:1 kontrast verir (WCAG AA). */
+  --color-signal-300: #fdba74;
+  --color-signal-500: #ea580c;
+  --color-signal-600: #b83c0a;
+  --color-signal-700: #9a3412;
+
+  /* Çizim çizgisi */
+  --color-rule: rgb(28 27 25 / 0.16);
+  --color-rule-strong: rgb(28 27 25 / 0.5);
+  --color-rule-inverse: rgb(246 245 242 / 0.1);
+
+  --container-site: 88rem;
+
+  --ease-draft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    font-feature-settings: 'ss01';
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-stretch: 82%;
+    text-wrap: balance;
+    @apply font-semibold tracking-tight;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-600);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--color-signal-300);
+    color: var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  /* Hareket azaltma tercihinde tüm geçiş ve animasyonları kapat. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-(--container-site) px-4 sm:px-6 lg:px-10;
+  }
+
+  /* Pafta numarası gibi küçük, monospace bölüm etiketi. */
+  .eyebrow {
+    @apply font-mono text-xs font-medium tracking-[0.12em] uppercase;
+  }
+
+  /* Milimetrik kâğıt ızgarası */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(var(--color-rule) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-rule) 1px, transparent 1px),
+      linear-gradient(rgb(28 27 25 / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(28 27 25 / 0.05) 1px, transparent 1px);
+    background-size:
+      96px 96px,
+      96px 96px,
+      24px 24px,
+      24px 24px;
+    background-position: -1px -1px;
+  }
+
+  .blueprint-grid-inverse {
+    background-image:
+      linear-gradient(var(--color-rule-inverse) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-rule-inverse) 1px, transparent 1px);
+    background-size: 96px 96px;
+    background-position: -1px -1px;
+  }
+
+  /* Kesim/köşe işaretleri: görsellerin etrafında çizim antetindeki gibi. */
+  .crop-marks {
+    position: relative;
+  }
+  .crop-marks::before,
+  .crop-marks::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .crop-marks::before {
+    top: -7px;
+    left: -7px;
+    border-top: 1.5px solid currentColor;
+    border-left: 1.5px solid currentColor;
+  }
+  .crop-marks::after {
+    right: -7px;
+    bottom: -7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+  }
+
+  /* Markdown gövdesi (proje açıklamaları) */
+  .prose-maksef {
+    @apply text-concrete-800 max-w-[68ch] text-lg leading-relaxed;
+  }
+  .prose-maksef > * + * {
+    @apply mt-5;
+  }
+  .prose-maksef a {
+    @apply link;
+  }
+  .prose-maksef strong {
+    @apply text-ink font-semibold;
+  }
+  .prose-maksef ul {
+    @apply list-[square] pl-5 marker:text-signal-600;
+  }
+  .prose-maksef h2,
+  .prose-maksef h3 {
+    @apply text-ink mt-10 text-2xl;
+  }
+
+  /* Form alanları */
+  .field-label {
+    @apply text-concrete-800 mb-2 block text-sm font-semibold;
+  }
+  .field-hint {
+    @apply text-concrete-600 mt-1.5 text-sm;
+  }
+  .field-input {
+    @apply border-concrete-400 text-ink placeholder:text-concrete-500 hover:border-concrete-600 focus:border-ink block min-h-12 w-full border bg-white px-3.5 py-2.5 text-base transition-colors;
+  }
+  .field-input:focus-visible {
+    outline-offset: 0;
+  }
+  .field-input:user-invalid {
+    @apply border-signal-600;
+  }
+  .choice {
+    @apply border-concrete-400 hover:border-concrete-700 has-checked:border-ink has-checked:bg-concrete-100 has-focus-visible:outline-signal-600 flex min-h-12 cursor-pointer items-center gap-3 border bg-white px-3.5 py-2.5 text-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2;
+  }
+  .choice input {
+    @apply accent-signal-600 size-4 shrink-0;
+  }
+}
+
+@utility font-stretch-condensed {
+  font-stretch: 75%;
+}
+@utility font-stretch-semi {
+  font-stretch: 87.5%;
+}
+@utility font-stretch-wide {
+  font-stretch: 112%;
+}
+
+/* Butonlar ve bağlantılar @utility olarak tanımlı; böylece hem HTML'de hem @apply ile kullanılabilir. */
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-3 px-6 text-sm font-semibold tracking-wide uppercase transition-colors duration-200;
+  font-stretch: 90%;
+}
+@utility btn-primary {
+  @apply btn bg-signal-600 hover:bg-signal-700 text-white;
+}
+@utility btn-dark {
+  @apply btn bg-ink text-paper hover:bg-concrete-700;
+}
+@utility btn-outline {
+  @apply btn border-ink text-ink hover:bg-ink hover:text-paper border;
+}
+@utility btn-outline-inverse {
+  @apply btn border-paper/60 text-paper hover:bg-paper hover:text-ink border;
+}
+/* Okunur bağlantı: alt çizgili, hover'da turuncu. */
+@utility link {
+  @apply decoration-signal-600 hover:text-signal-700 underline decoration-1 underline-offset-4 transition-colors;
+}

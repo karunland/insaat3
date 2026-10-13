@@ -1,0 +1,50 @@
+---
+import { languages, langs, type Lang } from '@/i18n/config';
+import type { Alternates } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  /** Aynı sayfanın diğer dillerdeki adresleri. */
+  alternates: Alternates;
+  class?: string;
+}
+
+const { lang, alternates, class: className } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<nav aria-label={t.a11y.langSwitch} class:list={['font-mono text-xs', className]}>
+  <ul class="flex items-center">
+    {
+      langs.map((l, i) => (
+        <li class="flex items-center">
+          {i > 0 && (
+            <span class="text-concrete-400 px-1" aria-hidden="true">
+              /
+            </span>
+          )}
+          {l === lang ? (
+            <span
+              class="text-ink inline-flex min-h-10 min-w-8 items-center justify-center font-semibold underline decoration-signal-600 decoration-2 underline-offset-4"
+              aria-current="true"
+            >
+              <span class="sr-only">{languages[l].label}</span>
+              <span aria-hidden="true">{languages[l].short}</span>
+            </span>
+          ) : (
+            <a
+              href={alternates[l]}
+              hreflang={languages[l].htmlLang}
+              lang={languages[l].htmlLang}
+              class="text-concrete-600 hover:text-ink inline-flex min-h-10 min-w-8 items-center justify-center transition-colors"
+            >
+              <span class="sr-only">{languages[l].label}</span>
+              <span aria-hidden="true">{languages[l].short}</span>
+            </a>
+          )}
+        </li>
+      ))
+    }
+  </ul>
+</nav>

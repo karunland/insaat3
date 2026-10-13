@@ -1,0 +1,28 @@
+---
+/**
+ * Bölüm başlığı: pafta numarası gibi "02 — ETİKET" ve altında başlık.
+ */
+interface Props {
+  eyebrow: string;
+  title: string;
+  /** Bölüm numarası (ör. 2 → "02"). */
+  index?: number;
+  lead?: string;
+  id?: string;
+  as?: 'h1' | 'h2';
+  inverse?: boolean;
+  class?: string;
+}
+
+const { eyebrow, title, index, lead, id, as: Tag = 'h2', inverse = false, class: className } = Astro.props;
+---
+
+<div class:list={['max-w-3xl', className]}>
+  <p class:list={['eyebrow flex items-center gap-3', inverse ? 'text-concrete-300' : 'text-concrete-600']}>
+    {index !== undefined && <span class="text-signal-600">{String(index).padStart(2, '0')}</span>}
+    <span class:list={['h-px w-8', inverse ? 'bg-concrete-500' : 'bg-concrete-400']} aria-hidden="true"></span>
+    <span>{eyebrow}</span>
+  </p>
+  <Tag id={id} class="mt-4 text-3xl leading-[1.05] sm:text-4xl lg:text-5xl">{title}</Tag>
+  {lead && <p class:list={['mt-5 text-lg leading-relaxed', inverse ? 'text-concrete-300' : 'text-concrete-700']}>{lead}</p>}
+</div>

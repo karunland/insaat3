@@ -1,0 +1,36 @@
+---
+/**
+ * İç sayfaların üst bölümü: ızgara kâğıdı zemin, etiket, H1 ve giriş metni.
+ * İsteğe bağlı `actions` slot'u butonlar içindir.
+ */
+import DimensionLine from './DimensionLine.astro';
+
+interface Props {
+  eyebrow: string;
+  title: string;
+  lead?: string;
+}
+
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<section class="blueprint-grid border-rule border-b">
+  <div class="container-site pt-14 pb-12 lg:pt-24 lg:pb-16">
+    <p class="eyebrow text-concrete-600 flex items-center gap-3">
+      <span class="bg-signal-600 size-2" aria-hidden="true"></span>
+      {eyebrow}
+    </p>
+    <h1 class="mt-5 max-w-5xl text-4xl leading-[1.02] sm:text-5xl lg:text-7xl" style="font-stretch: 78%">
+      {title}
+    </h1>
+    {lead && <p class="text-concrete-700 mt-6 max-w-3xl text-lg leading-relaxed lg:text-xl">{lead}</p>}
+    {
+      Astro.slots.has('actions') && (
+        <div class="mt-8 flex flex-wrap gap-3">
+          <slot name="actions" />
+        </div>
+      )
+    }
+    <DimensionLine class="text-concrete-400 mt-12 hidden md:flex" />
+  </div>
+</section>

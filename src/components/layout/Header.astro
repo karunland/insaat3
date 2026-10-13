@@ -1,0 +1,131 @@
+---
+import type { Lang } from '@/i18n/config';
+import { path, type Alternates, type RouteKey } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import Logo from './Logo.astro';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface Props {
+  lang: Lang;
+  alternates: Alternates;
+  /** Menüde vurgulanacak bölüm. Verilmezse URL'den çıkarılır. */
+  activeNav?: RouteKey;
+}
+
+const { lang, alternates, activeNav } = Astro.props;
+const t = useTranslations(lang);
+
+const items = [
+  { key: 'about', label: t.nav.about },
+  { key: 'contracting', label: t.nav.contracting },
+  { key: 'urbanRenewal', label: t.nav.urbanRenewal },
+  { key: 'projects', label: t.nav.projects },
+] as const satisfies { key: RouteKey; label: string }[];
+
+const current = Astro.url.pathname;
+const isActive = (key: RouteKey) => activeNav === key || (!activeNav && current.startsWith(path(key, lang)));
+---
+
+<header class="border-rule bg-paper/95 sticky top-0 z-40 border-b backdrop-blur-sm">
+  <div class="container-site flex h-16 items-center justify-between gap-6 lg:h-20">
+    <a href={path('home', lang)} class="text-ink" aria-label={t.a11y.homeLink}>
+      <Logo />
+    </a>
+
+    <nav aria-label={t.a11y.mainNav} class="hidden lg:block">
+      <ul class="flex items-center gap-1">
+        {
+          items.map((item) => (
+            <li>
+              <a
+                href={path(item.key, lang)}
+                aria-current={isActive(item.key) ? 'page' : undefined}
+                class="text-concrete-700 hover:text-ink aria-[current=page]:text-ink relative inline-flex min-h-11 items-center px-3.5 text-[0.95rem] font-medium transition-colors after:absolute after:inset-x-3.5 after:bottom-1.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-signal-600 after:transition-transform hover:after:scale-x-100 aria-[current=page]:after:scale-x-100"
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2 sm:gap-4">
+      <LanguageSwitcher lang={lang} alternates={alternates} />
+      <a href={path('contact', lang)} class="btn-primary hidden min-h-11 px-5 sm:inline-flex">
+        {t.nav.cta}
+      </a>
+      <button
+        type="button"
+        class="text-ink hover:bg-concrete-100 -mr-2 inline-flex size-11 items-center justify-center lg:hidden"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-toggle
+        data-label-open={t.a11y.openMenu}
+        data-label-close={t.a11y.closeMenu}
+      >
+        <span class="sr-only" data-menu-label>{t.a11y.openMenu}</span>
+        <svg viewBox="0 0 24 24" class="size-6" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path class="menu-icon-open" d="M3 7h18M3 12h18M3 17h18"></path>
+          <path class="menu-icon-close hidden" d="M5 5l14 14M19 5L5 19"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="border-rule bg-paper blueprint-grid border-t lg:hidden" hidden>
+    <nav aria-label={t.a11y.mainNav} class="container-site py-6">
+      <ul class="divide-rule border-rule divide-y border-y">
+        {
+          [...items, { key: 'contact' as const, label: t.nav.contact }].map((item, i) => (
+            <li>
+              <a
+                href={path(item.key, lang)}
+                aria-current={isActive(item.key) ? 'page' : undefined}
+                class="aria-[current=page]:text-signal-700 flex min-h-14 items-center justify-between gap-4 text-xl font-semibold"
+                style="font-stretch: 85%"
+              >
+                {item.label}
+                <span class="eyebrow text-concrete-500" aria-hidden="true">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a href={path('contact', lang)} class="btn-primary mt-6 w-full">
+        {t.nav.cta}
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.getElementById('mobile-menu');
+  const label = toggle?.querySelector('[data-menu-label]');
+
+  function setOpen(open: boolean) {
+    if (!toggle || !menu) return;
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.querySelector('.menu-icon-open')?.classList.toggle('hidden', open);
+    toggle.querySelector('.menu-icon-close')?.classList.toggle('hidden', !open);
+    if (label) label.textContent = (open ? toggle.dataset.labelClose : toggle.dataset.labelOpen) ?? '';
+  }
+
+  toggle?.addEventListener('click', () => setOpen(menu?.hidden === true));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menu && !menu.hidden) {
+      setOpen(false);
+      toggle?.focus();
+    }
+  });
+
+  // Ekran genişleyip masaüstü menüye geçilirse mobil menüyü kapat.
+  matchMedia('(min-width: 64rem)').addEventListener('change', (event) => {
+    if (event.matches) setOpen(false);
+  });
+</script>

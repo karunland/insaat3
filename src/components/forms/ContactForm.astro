@@ -1,0 +1,59 @@
+---
+/**
+ * Genel iletişim formu. Konu, URL'deki ?topic=<anahtar> ile ön seçilebilir
+ * (ör. taahhüt projesi sayfasındaki CTA → ?topic=contracting).
+ */
+import type { Lang } from '@/i18n/config';
+import { ui } from '@/i18n/ui';
+import { useTranslations } from '@/i18n/utils';
+import Web3Form from './Web3Form.astro';
+import TextField from './TextField.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+// Seçeneklerin değeri her dilde Türkçe gider; e-postayı okuyan ekip için.
+const topicValues = ui.tr.forms.topics;
+const topics = Object.keys(t.forms.topics) as (keyof typeof t.forms.topics)[];
+---
+
+<Web3Form lang={lang} subject="Web sitesi — iletişim formu" id="iletisim-formu">
+  <div class="grid gap-5 sm:grid-cols-2">
+    <TextField lang={lang} name="name" label={t.forms.name} required autocomplete="name" />
+    <TextField lang={lang} name="Kurum" label={t.forms.company} autocomplete="organization" />
+    <TextField lang={lang} name="email" type="email" label={t.forms.email} required autocomplete="email" />
+    <TextField lang={lang} name="Telefon" type="tel" label={t.forms.phone} autocomplete="tel" inputmode="tel" />
+
+    <div class="sm:col-span-2">
+      <label for="contact-topic" class="field-label">
+        {t.forms.topic} <span class="text-signal-700" aria-hidden="true">*</span>
+      </label>
+      <select id="contact-topic" name="Konu" required class="field-input" data-topic-select>
+        <option value="">{t.forms.select}</option>
+        {topics.map((key) => <option value={topicValues[key]} data-key={key}>{t.forms.topics[key]}</option>)}
+      </select>
+    </div>
+
+    <TextField lang={lang} name="Mesaj" label={t.forms.message} required multiline class="sm:col-span-2" />
+  </div>
+
+  <label class="text-concrete-700 mt-6 flex items-start gap-3 text-sm">
+    <input type="checkbox" name="KVKK onayı" value="Evet" required class="accent-signal-600 mt-0.5 size-5 shrink-0" />
+    <span>{t.forms.consent}</span>
+  </label>
+
+  <button type="submit" class="btn-primary mt-8 w-full sm:w-auto">
+    {t.forms.send}
+    <span aria-hidden="true">→</span>
+  </button>
+</Web3Form>
+
+<script>
+  const select = document.querySelector<HTMLSelectElement>('[data-topic-select]');
+  const topic = new URLSearchParams(location.search).get('topic');
+  const option = topic ? select?.querySelector<HTMLOptionElement>(`option[data-key="${CSS.escape(topic)}"]`) : null;
+  if (select && option) select.value = option.value;
+</script>

@@ -1,0 +1,10 @@
+---
+import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+import ProjectDetailPage from '@/views/ProjectDetailPage.astro';
+import { getProjectStaticPaths } from '@/lib/projects';
+
+export const getStaticPaths = (() => getProjectStaticPaths('tr')) satisfies GetStaticPaths;
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+---
+
+<ProjectDetailPage {...(Astro.props as Props)} />

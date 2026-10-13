@@ -1,0 +1,94 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import ContactCta from '@/components/ui/ContactCta.astro';
+import type { Lang } from '@/i18n/config';
+import { routes } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { getProjects, uniqueClients } from '@/lib/projects';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const clients = uniqueClients(await getProjects(lang));
+---
+
+<BaseLayout lang={lang} alternates={routes.about} title={t.about.title} description={t.about.description}>
+  <PageHeader eyebrow={t.about.eyebrow} title={t.about.title} lead={t.about.lead} />
+
+  <section class="container-site grid gap-10 py-20 lg:grid-cols-12 lg:py-28">
+    <div class="space-y-6 lg:col-span-7 lg:col-start-6">
+      {t.about.body.map((paragraph) => <p class="text-concrete-800 text-lg leading-relaxed lg:text-xl">{paragraph}</p>)}
+    </div>
+  </section>
+
+  <section class="border-rule border-t" aria-labelledby="services-title">
+    <div class="container-site py-20 lg:py-28">
+      <SectionHeading index={1} eyebrow={t.about.servicesEyebrow} title={t.about.servicesTitle} id="services-title" />
+      <ul class="mt-12 grid gap-px bg-(--color-rule) sm:grid-cols-2 lg:grid-cols-4">
+        {
+          t.about.services.map((service, i) => (
+            <li class="bg-paper p-6 lg:p-8">
+              <span class="text-signal-600 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="mt-3 text-2xl" style="font-stretch: 82%">
+                {service.title}
+              </h3>
+              <p class="text-concrete-700 mt-3 leading-relaxed">{service.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-concrete-900 text-paper blueprint-grid-inverse" aria-labelledby="principles-title">
+    <div class="container-site py-20 lg:py-28">
+      <SectionHeading
+        index={2}
+        eyebrow={t.about.principlesEyebrow}
+        title={t.about.principlesTitle}
+        id="principles-title"
+        inverse
+      />
+      <ol class="border-rule-inverse mt-12 grid border-t md:grid-cols-3">
+        {
+          t.about.principles.map((item) => (
+            <li class="border-rule-inverse border-b py-8 md:border-r md:border-b-0 md:px-8 md:first:pl-0 md:last:border-r-0">
+              <h3 class="text-2xl" style="font-stretch: 82%">
+                {item.title}
+              </h3>
+              <p class="text-concrete-300 mt-3 leading-relaxed">{item.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  {
+    clients.length > 0 && (
+      <section class="container-site py-20 lg:py-28" aria-labelledby="clients-title">
+        <SectionHeading
+          index={3}
+          eyebrow={t.about.clientsEyebrow}
+          title={t.about.clientsTitle}
+          lead={t.about.clientsNote}
+          id="clients-title"
+        />
+        <ul class="mt-12 grid gap-px bg-(--color-rule) sm:grid-cols-2 lg:grid-cols-3">
+          {clients.map((client) => (
+            <li class="bg-paper flex min-h-32 items-center p-6 text-2xl font-semibold" style="font-stretch: 85%">
+              {client}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <ContactCta lang={lang} />
+</BaseLayout>

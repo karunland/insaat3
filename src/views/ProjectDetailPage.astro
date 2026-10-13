@@ -1,0 +1,199 @@
+---
+import { Picture } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import StatusBadge from '@/components/projects/StatusBadge.astro';
+import Gallery from '@/components/projects/Gallery.astro';
+import BeforeAfter from '@/components/projects/BeforeAfter.astro';
+import ContactCta from '@/components/ui/ContactCta.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import DimensionLine from '@/components/ui/DimensionLine.astro';
+import { path, RENEWAL_FORM_ID, type Alternates } from '@/i18n/routes';
+import { format, useTranslations } from '@/i18n/utils';
+import type { Project } from '@/lib/projects';
+
+interface Props {
+  project: Project;
+  related: Project[];
+  alternates: Alternates;
+}
+
+const { project, related, alternates } = Astro.props;
+const { data, lang } = project;
+const t = useTranslations(lang);
+const { Content } = await render(project);
+
+const isRenewal = data.category === 'kentsel-donusum';
+const categoryHref = path(isRenewal ? 'urbanRenewal' : 'contracting', lang);
+const ctaHref = isRenewal ? `${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}` : `${path('contact', lang)}?topic=contracting`;
+
+const specs = [
+  { label: t.project.client, value: data.client },
+  { label: t.project.year, value: String(data.year) },
+  { label: t.project.location, value: data.location },
+  { label: t.project.category, value: t.categories[data.category] },
+].filter((row): row is { label: string; value: string } => Boolean(row.value));
+
+const gallery = data.gallery.map((image, i) => ({
+  src: image.src,
+  alt: image.alt ?? format(t.project.photoAlt, { title: data.title, index: i + 1 }),
+}));
+---
+
+<BaseLayout
+  lang={lang}
+  alternates={alternates}
+  title={data.title}
+  description={data.summary}
+  image={data.cover}
+  imageAlt={data.coverAlt}
+  type="article"
+  activeNav={isRenewal ? 'urbanRenewal' : 'contracting'}
+>
+  <article>
+    <header class="blueprint-grid border-rule border-b">
+      <div class="container-site pt-8 pb-12 lg:pt-12 lg:pb-16">
+        <nav aria-label={t.a11y.breadcrumb}>
+          <ol class="eyebrow text-concrete-600 flex flex-wrap items-center gap-2">
+            <li><a href={path('projects', lang)} class="hover:text-ink">{t.nav.projects}</a></li>
+            <li aria-hidden="true">/</li>
+            <li><a href={categoryHref} class="hover:text-ink">{t.categories[data.category]}</a></li>
+          </ol>
+        </nav>
+
+        <div class="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2">
+          <p class="eyebrow text-concrete-600">{data.year}</p>
+          <StatusBadge lang={lang} status={data.status} class="text-concrete-800" />
+          {data.isExample && <span class="eyebrow bg-ink text-paper px-2 py-1">{t.common.exampleBadge}</span>}
+        </div>
+        <h1 class="mt-4 max-w-5xl text-3xl leading-[1.05] sm:text-5xl lg:text-6xl" style="font-stretch: 78%">
+          {data.title}
+        </h1>
+        <p class="text-concrete-700 mt-6 max-w-3xl text-lg leading-relaxed lg:text-xl">{data.summary}</p>
+
+        {
+          data.isExample && (
+            <p class="border-signal-600 text-concrete-800 mt-8 max-w-3xl border-l-4 bg-white px-5 py-4" role="note">
+              {t.common.exampleNotice}
+            </p>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="container-site pt-10 lg:pt-14">
+      <div class="crop-marks text-concrete-400">
+        <Picture
+          src={data.cover}
+          alt={data.coverAlt}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1280, 1600, 2000, 2400]}
+          sizes="(min-width: 1408px) 1328px, 100vw"
+          loading="eager"
+          fetchpriority="high"
+          class="bg-concrete-200 aspect-[16/10] w-full object-cover lg:aspect-[21/10]"
+        />
+      </div>
+      <DimensionLine label={data.location ?? String(data.year)} class="text-concrete-500 mt-4" />
+    </div>
+
+    <div class="container-site grid gap-14 py-16 lg:grid-cols-12 lg:py-24">
+      <div class="lg:col-span-7">
+        <h2 class="eyebrow text-concrete-600">{t.project.overview}</h2>
+        <div class="prose-maksef mt-5">
+          <Content />
+        </div>
+
+        {
+          data.scope.length > 0 && (
+            <section class="mt-14" aria-labelledby="scope-title">
+              <h2 id="scope-title" class="eyebrow text-concrete-600">
+                {t.project.scope}
+              </h2>
+              <ol class="border-rule mt-5 border-t">
+                {data.scope.map((item, i) => (
+                  <li class="border-rule flex gap-5 border-b py-4 text-lg">
+                    <span class="text-signal-600 font-mono text-sm leading-7">{String(i + 1).padStart(2, '0')}</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )
+        }
+      </div>
+
+      <aside class="lg:col-span-4 lg:col-start-9">
+        <div class="border-ink bg-white lg:sticky lg:top-28">
+          <h2 class="eyebrow bg-ink text-paper px-5 py-3">{t.project.specTitle}</h2>
+          <dl class="divide-rule divide-y border border-t-0 border-current/20 px-5">
+            {
+              specs.map((row) => (
+                <div class="grid grid-cols-[8.5rem_1fr] gap-3 py-4">
+                  <dt class="eyebrow text-concrete-500 pt-0.5">{row.label}</dt>
+                  <dd class="font-medium">{row.value}</dd>
+                </div>
+              ))
+            }
+            <div class="grid grid-cols-[8.5rem_1fr] gap-3 py-4">
+              <dt class="eyebrow text-concrete-500 pt-0.5">{t.project.status}</dt>
+              <dd><StatusBadge lang={lang} status={data.status} /></dd>
+            </div>
+          </dl>
+          <div class="border border-t-0 border-current/20 p-5">
+            <a href={ctaHref} class="btn-primary w-full">
+              {isRenewal ? t.project.ctaRenewalButton : t.nav.cta}
+              <span aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    {
+      data.beforeAfter && (
+        <section class="container-site pb-16 lg:pb-24" aria-labelledby="before-after-title">
+          <SectionHeading eyebrow={t.categories[data.category]} title={t.project.beforeAfter} id="before-after-title" class="mb-8" />
+          <BeforeAfter lang={lang} {...data.beforeAfter} />
+        </section>
+      )
+    }
+
+    {
+      gallery.length > 0 && (
+        <section class="container-site pb-16 lg:pb-24" aria-labelledby="gallery-title">
+          <SectionHeading
+            eyebrow={format(t.project.photoCount, { count: gallery.length })}
+            title={t.project.gallery}
+            id="gallery-title"
+            class="mb-8"
+          />
+          <Gallery lang={lang} images={gallery} />
+        </section>
+      )
+    }
+  </article>
+
+  <ContactCta lang={lang} variant={isRenewal ? 'renewal' : 'contracting'} />
+
+  {
+    related.length > 0 && (
+      <section class="container-site py-16 lg:py-24" aria-labelledby="related-title">
+        <div class="mb-10 flex flex-wrap items-end justify-between gap-6">
+          <SectionHeading eyebrow={t.categories[data.category]} title={t.project.relatedTitle} id="related-title" />
+          <a href={path('projects', lang)} class="link font-medium">
+            {t.project.back}
+          </a>
+        </div>
+        <ul class="grid gap-x-8 gap-y-14 sm:grid-cols-2 xl:grid-cols-3">
+          {related.map((p) => (
+            <li>
+              <ProjectCard project={p} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>

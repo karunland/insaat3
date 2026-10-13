@@ -1,0 +1,94 @@
+---
+/**
+ * Önce / sonra karşılaştırma kaydırıcısı.
+ *
+ * Etkileşim, görselin tamamını kaplayan görünmez bir <input type="range"> ile sağlanır:
+ * fare/dokunmatik sürükleme ve klavye (← → Home End PageUp PageDown) tarayıcıdan
+ * hazır gelir, ekran okuyucular da onu standart bir kaydırıcı olarak duyurur.
+ * JS yalnızca değeri CSS değişkenine (--pos) yazar. JS yoksa %50'de sabit kalır.
+ */
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import type { Lang } from '@/i18n/config';
+import { useTranslations } from '@/i18n/utils';
+
+interface Props {
+  lang: Lang;
+  before: ImageMetadata;
+  beforeAlt: string;
+  after: ImageMetadata;
+  afterAlt: string;
+}
+
+const { lang, before, beforeAlt, after, afterAlt } = Astro.props;
+const t = useTranslations(lang);
+const widths = [640, 960, 1280, 1600];
+const sizes = '(min-width: 1408px) 1328px, 100vw';
+---
+
+<figure data-before-after>
+  <div class="bg-concrete-200 relative aspect-[3/2] overflow-hidden select-none" style="--pos: 50%">
+    <Image src={after} alt={afterAlt} widths={widths} sizes={sizes} class="absolute inset-0 size-full object-cover" />
+    <div class="absolute inset-0" style="clip-path: inset(0 calc(100% - var(--pos)) 0 0)">
+      <Image src={before} alt={beforeAlt} widths={widths} sizes={sizes} class="absolute inset-0 size-full object-cover" />
+    </div>
+
+    <span class="eyebrow bg-ink text-paper pointer-events-none absolute top-3 left-3 px-2 py-1">{t.project.before}</span>
+    <span class="eyebrow bg-paper text-ink pointer-events-none absolute top-3 right-3 px-2 py-1">{t.project.after}</span>
+
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value="50"
+      step="1"
+      aria-label={t.project.sliderLabel}
+      aria-valuetext={`${t.project.before} 50%`}
+      data-label-before={t.project.before}
+      class="peer absolute inset-0 z-10 size-full cursor-ew-resize appearance-none opacity-0"
+    />
+
+    <!-- Ayırıcı çizgi ve tutamak (görsel) -->
+    <div
+      class="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-white shadow-[0_0_0_1px_rgb(0_0_0/0.25)] peer-focus-visible:bg-signal-500"
+      style="left: var(--pos)"
+      aria-hidden="true"
+    >
+      <span class="bg-ink text-paper absolute top-1/2 left-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center border-2 border-white">
+        <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 6l-6 6 6 6M15 6l6 6-6 6"></path>
+        </svg>
+      </span>
+    </div>
+  </div>
+  <figcaption class="text-concrete-600 mt-3 text-sm">{t.project.beforeAfterHint}</figcaption>
+</figure>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-before-after]')) {
+    const input = root.querySelector<HTMLInputElement>('input[type="range"]');
+    const stage = input?.parentElement;
+    if (!input || !stage) continue;
+
+    const update = () => {
+      stage.style.setProperty('--pos', `${input.value}%`);
+      input.setAttribute('aria-valuetext', `${input.dataset.labelBefore} ${input.value}%`);
+    };
+    input.addEventListener('input', update);
+    update();
+  }
+</script>
+
+<style>
+  /* Görünmez kaydırıcının tutamağını incelt: tıklanan nokta ile çizgi tam örtüşsün. */
+  input[type='range']::-webkit-slider-thumb {
+    appearance: none;
+    width: 2px;
+    height: 100%;
+  }
+  input[type='range']::-moz-range-thumb {
+    width: 2px;
+    height: 100%;
+    border: 0;
+  }
+</style>

@@ -1,0 +1,21 @@
+---
+/**
+ * Geçici logo: I-profil kesiti + MAKSEF yazısı.
+ * TODO: Kurumsal logo hazır olduğunda SVG'yi buraya koy (public/favicon.svg'yi de güncelle).
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span class:list={['inline-flex items-center gap-2.5', className]}>
+  <svg viewBox="0 0 32 32" class="size-8 shrink-0" aria-hidden="true">
+    <rect x="0.75" y="0.75" width="30.5" height="30.5" fill="none" stroke="currentColor" stroke-width="1.5"></rect>
+    <path d="M7 7h18v4h-7v10h7v4H7v-4h7V11H7z" fill="currentColor"></path>
+    <rect x="26" y="26" width="3" height="3" fill="var(--color-signal-600)"></rect>
+  </svg>
+  <span class="text-[1.35rem] leading-none font-bold tracking-[0.06em]" style="font-stretch: 118%">
+    MAKSEF
+  </span>
+</span>

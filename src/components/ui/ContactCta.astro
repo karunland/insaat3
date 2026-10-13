@@ -1,0 +1,80 @@
+---
+/**
+ * Sayfa sonlarındaki iletişim çağrısı (CTA).
+ *  - general:     genel iletişim + kentsel dönüşüm başvurusu
+ *  - contracting: taahhüt projesi detayından → iletişim formu (konu ön seçili)
+ *  - renewal:     kentsel dönüşüm projesi detayından → başvuru formu
+ */
+import type { Lang } from '@/i18n/config';
+import { path, RENEWAL_FORM_ID } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { site, telHref } from '@/config/site';
+import DimensionLine from './DimensionLine.astro';
+
+interface Props {
+  lang: Lang;
+  variant?: 'general' | 'contracting' | 'renewal';
+}
+
+const { lang, variant = 'general' } = Astro.props;
+const t = useTranslations(lang);
+
+const renewalHref = `${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}`;
+const contactHref = path('contact', lang);
+
+const content = {
+  general: {
+    title: t.cta.title,
+    text: t.cta.text,
+    primary: { href: contactHref, label: t.cta.primary },
+    secondary: { href: renewalHref, label: t.cta.secondary },
+  },
+  contracting: {
+    title: t.project.ctaContractingTitle,
+    text: t.project.ctaContractingText,
+    primary: { href: `${contactHref}?topic=contracting`, label: t.cta.primary },
+    secondary: undefined,
+  },
+  renewal: {
+    title: t.project.ctaRenewalTitle,
+    text: t.project.ctaRenewalText,
+    primary: { href: renewalHref, label: t.project.ctaRenewalButton },
+    secondary: { href: `${contactHref}?topic=renewal`, label: t.cta.primary },
+  },
+}[variant];
+---
+
+<section class="bg-concrete-900 text-paper blueprint-grid-inverse" aria-labelledby={`cta-${variant}`}>
+  <div class="container-site grid gap-12 py-16 lg:grid-cols-12 lg:py-24">
+    <div class="lg:col-span-7">
+      <p class="eyebrow text-signal-300">{t.cta.eyebrow}</p>
+      <h2 id={`cta-${variant}`} class="mt-4 text-3xl leading-[1.05] sm:text-4xl lg:text-5xl" style="font-stretch: 80%">
+        {content.title}
+      </h2>
+      <p class="text-concrete-300 mt-5 max-w-xl text-lg">{content.text}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={content.primary.href} class="btn-primary">
+          {content.primary.label}
+          <span aria-hidden="true">→</span>
+        </a>
+        {content.secondary && <a href={content.secondary.href} class="btn-outline-inverse">{content.secondary.label}</a>}
+      </div>
+    </div>
+
+    <div class="border-rule-inverse flex flex-col justify-end gap-6 border-t pt-8 lg:col-span-4 lg:col-start-9 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-10">
+      <DimensionLine class="text-concrete-500" />
+      <p>
+        <span class="eyebrow text-concrete-400 block">{t.cta.callUs}</span>
+        <a href={telHref(site.phone)} class="hover:text-signal-300 mt-1 inline-block text-2xl font-semibold transition-colors">
+          {site.phone}
+        </a>
+      </p>
+      <p>
+        <span class="eyebrow text-concrete-400 block">{t.cta.writeUs}</span>
+        <a href={`mailto:${site.email}`} class="hover:text-signal-300 mt-1 inline-block text-2xl font-semibold break-all transition-colors">
+          {site.email}
+        </a>
+      </p>
+    </div>
+  </div>
+</section>

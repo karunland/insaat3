@@ -1,0 +1,61 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHeader from '@/components/ui/PageHeader.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import ContactCta from '@/components/ui/ContactCta.astro';
+import ProjectList from '@/components/projects/ProjectList.astro';
+import type { Lang } from '@/i18n/config';
+import { path, routes } from '@/i18n/routes';
+import { format, useTranslations } from '@/i18n/utils';
+import { getProjects } from '@/lib/projects';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const projects = await getProjects(lang, (p) => p.data.category === 'taahhut');
+---
+
+<BaseLayout
+  lang={lang}
+  alternates={routes.contracting}
+  title={t.contracting.title}
+  description={t.contracting.description}
+>
+  <PageHeader eyebrow={t.contracting.eyebrow} title={t.contracting.title} lead={t.contracting.lead}>
+    <a slot="actions" href={`${path('contact', lang)}?topic=contracting`} class="btn-primary">
+      {t.nav.cta}
+      <span aria-hidden="true">→</span>
+    </a>
+  </PageHeader>
+
+  <section class="border-rule border-b" aria-labelledby="scope-title">
+    <div class="container-site grid gap-10 py-16 lg:grid-cols-12">
+      <h2 id="scope-title" class="eyebrow text-concrete-600 lg:col-span-3">{t.contracting.scopeTitle}</h2>
+      <ul class="grid gap-x-10 sm:grid-cols-2 lg:col-span-9">
+        {
+          t.contracting.scope.map((item, i) => (
+            <li class="border-rule flex gap-4 border-b py-4 text-lg">
+              <span class="text-signal-600 font-mono text-sm leading-7">{String(i + 1).padStart(2, '0')}</span>
+              {item}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="container-site py-20 lg:py-28" aria-labelledby="list-title">
+    <SectionHeading
+      eyebrow={format(t.common.projectCount, { count: projects.length })}
+      title={t.contracting.listTitle}
+      id="list-title"
+      class="mb-12"
+    />
+    <ProjectList lang={lang} projects={projects} filters={['status']} eagerCount={0} />
+  </section>
+
+  <ContactCta lang={lang} variant="contracting" />
+</BaseLayout>

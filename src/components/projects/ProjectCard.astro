@@ -1,0 +1,57 @@
+---
+import { Picture } from 'astro:assets';
+import type { Project } from '@/lib/projects';
+import { projectPath } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import StatusBadge from './StatusBadge.astro';
+
+interface Props {
+  project: Project;
+  /** Liste başlığına göre h2 veya h3. */
+  headingLevel?: 'h2' | 'h3';
+  /** İlk görünen kartlar için true: görsel tembel yüklenmez. */
+  eager?: boolean;
+}
+
+const { project, headingLevel: Heading = 'h3', eager = false } = Astro.props;
+const { data, lang, slug } = project;
+const t = useTranslations(lang);
+const href = projectPath(slug, lang);
+---
+
+<article class="group relative flex h-full flex-col">
+  <div class="crop-marks text-concrete-400 group-hover:text-signal-600 transition-colors">
+    <div class="bg-concrete-200 relative aspect-[4/3] overflow-hidden">
+      <Picture
+        src={data.cover}
+        alt=""
+        formats={['avif', 'webp']}
+        widths={[400, 640, 960, 1280]}
+        sizes="(min-width: 1280px) 400px, (min-width: 640px) 50vw, 100vw"
+        loading={eager ? 'eager' : 'lazy'}
+        class="size-full object-cover transition-transform duration-700 ease-(--ease-draft) motion-safe:group-hover:scale-[1.03]"
+      />
+      {
+        data.isExample && (
+          <span class="eyebrow bg-paper text-ink absolute top-3 left-3 px-2 py-1">{t.common.exampleBadge}</span>
+        )
+      }
+    </div>
+  </div>
+
+  <div class="border-rule mt-5 flex items-center justify-between gap-3 border-b pb-3">
+    <p class="eyebrow text-concrete-600">
+      <span>{data.year}</span>
+      <span class="text-concrete-400 mx-1.5" aria-hidden="true">/</span>
+      <span>{t.categories[data.category]}</span>
+    </p>
+    <StatusBadge lang={lang} status={data.status} class="text-concrete-700" />
+  </div>
+
+  <Heading class="mt-4 text-xl leading-snug font-semibold" style="font-stretch: 88%">
+    <a href={href} class="after:absolute after:inset-0 group-hover:text-signal-700 transition-colors">
+      {data.title}
+    </a>
+  </Heading>
+  {data.client && <p class="text-concrete-600 mt-2 text-sm">{data.client}</p>}
+</article>

@@ -1,0 +1,215 @@
+---
+import { Picture } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectList from '@/components/projects/ProjectList.astro';
+import SectionHeading from '@/components/ui/SectionHeading.astro';
+import ContactCta from '@/components/ui/ContactCta.astro';
+import type { Lang } from '@/i18n/config';
+import { path, projectPath, RENEWAL_FORM_ID, routes } from '@/i18n/routes';
+import { useTranslations } from '@/i18n/utils';
+import { getProjects } from '@/lib/projects';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const projects = await getProjects(lang);
+const real = projects.filter((p) => !p.data.isExample);
+// Örnek içerik hariç: önce öne çıkanlar, sonra en yeniler; 3 sütunlu ızgarada boşluk kalmasın diye 6 kart.
+const SHOWCASE_COUNT = 6;
+const showcase = [
+  ...real.filter((p) => p.data.featured),
+  ...real.filter((p) => !p.data.featured),
+].slice(0, SHOWCASE_COUNT);
+const hero = showcase[0];
+
+// Faaliyet alanı panellerinde hero'dakinden farklı bir görsel kullan.
+const coverOf = (category: 'taahhut' | 'kentsel-donusum') => {
+  const inCategory = projects.filter((p) => p.data.category === category);
+  return (inCategory.find((p) => p !== hero) ?? inCategory[0])?.data.cover;
+};
+
+const areas = [
+  {
+    index: '01',
+    title: t.home.contractingTitle,
+    text: t.home.contractingText,
+    link: t.home.contractingLink,
+    href: path('contracting', lang),
+    image: coverOf('taahhut'),
+  },
+  {
+    index: '02',
+    title: t.home.renewalTitle,
+    text: t.home.renewalText,
+    link: t.home.renewalLink,
+    href: path('urbanRenewal', lang),
+    image: coverOf('kentsel-donusum'),
+  },
+];
+
+const years = real.map((p) => p.data.year);
+const stats: { value: number | string; label: string }[] = [
+  { value: real.filter((p) => p.data.status === 'completed').length, label: t.home.statCompleted },
+  { value: real.filter((p) => p.data.status === 'ongoing').length, label: t.home.statOngoing },
+];
+if (years.length > 0) {
+  stats.push({ value: `${Math.min(...years)}–${Math.max(...years)}`, label: t.home.statYears });
+}
+---
+
+<BaseLayout lang={lang} alternates={routes.home}>
+  <!-- Hero -->
+  <section class="blueprint-grid border-rule border-b">
+    <div class="container-site grid items-end gap-12 py-12 lg:grid-cols-12 lg:gap-10 lg:py-20">
+      <div class="lg:col-span-6 lg:pb-6">
+        <p class="eyebrow text-concrete-600 flex items-center gap-3">
+          <span class="bg-signal-600 size-2" aria-hidden="true"></span>
+          {t.home.heroEyebrow}
+        </p>
+        <h1 class="mt-6 text-5xl leading-[0.95] sm:text-6xl xl:text-[5.5rem]" style="font-stretch: 72%">
+          {t.home.heroTitle}
+        </h1>
+        <p class="text-concrete-700 mt-7 max-w-xl text-lg leading-relaxed lg:text-xl">{t.home.heroLead}</p>
+        <div class="mt-9 flex flex-wrap gap-3">
+          <a href={path('projects', lang)} class="btn-primary">
+            {t.home.heroPrimary}
+            <span aria-hidden="true">→</span>
+          </a>
+          <a href={`${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}`} class="btn-outline">{t.home.heroSecondary}</a>
+        </div>
+      </div>
+
+      {
+        hero && (
+          <figure class="min-w-0 lg:col-span-6">
+            <a href={projectPath(hero.slug, lang)} class="group crop-marks text-concrete-500 block">
+              <Picture
+                src={hero.data.cover}
+                alt={hero.data.coverAlt}
+                formats={['avif', 'webp']}
+                widths={[480, 720, 960, 1280, 1600]}
+                sizes="(min-width: 1408px) 664px, (min-width: 1024px) 48vw, 100vw"
+                loading="eager"
+                fetchpriority="high"
+                class="bg-concrete-200 aspect-[4/3] w-full object-cover"
+              />
+            </a>
+            <figcaption class="mt-4 flex items-baseline justify-between gap-4">
+              <span class="eyebrow text-concrete-500 shrink-0">{t.home.heroImageCaption}</span>
+              <a href={projectPath(hero.slug, lang)} class="link min-w-0 truncate text-right text-sm font-medium">
+                {hero.data.title}
+              </a>
+            </figcaption>
+          </figure>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- İki faaliyet alanı -->
+  <section class="container-site py-20 lg:py-28" aria-labelledby="areas-title">
+    <SectionHeading index={1} eyebrow={t.home.areasEyebrow} title={t.home.areasTitle} id="areas-title" />
+    <div class="mt-12 grid gap-px bg-(--color-rule) md:grid-cols-2">
+      {
+        areas.map((area) => (
+          <a href={area.href} class="group bg-paper relative flex flex-col">
+            <div class="bg-concrete-300 relative aspect-[16/10] overflow-hidden">
+              {area.image && (
+                <Picture
+                  src={area.image}
+                  alt=""
+                  formats={['avif', 'webp']}
+                  widths={[480, 720, 960, 1280]}
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  class="size-full object-cover grayscale-[35%] transition duration-700 ease-(--ease-draft) group-hover:grayscale-0 motion-safe:group-hover:scale-[1.03]"
+                />
+              )}
+              <span class="bg-ink text-paper absolute top-0 left-0 px-4 py-3 font-mono text-2xl font-medium">
+                {area.index}
+              </span>
+            </div>
+            <div class="flex flex-1 flex-col p-6 lg:p-10">
+              <h3 class="text-3xl lg:text-4xl" style="font-stretch: 80%">
+                {area.title}
+              </h3>
+              <p class="text-concrete-700 mt-4 max-w-lg flex-1 text-lg leading-relaxed">{area.text}</p>
+              <span class="text-ink group-hover:text-signal-700 mt-8 inline-flex items-center gap-3 font-semibold transition-colors">
+                {area.link}
+                <span aria-hidden="true" class="transition-transform motion-safe:group-hover:translate-x-1">
+                  →
+                </span>
+              </span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Teknik föy: rakamlar -->
+  <section class="border-rule border-y" aria-labelledby="sheet-title">
+    <div class="container-site grid gap-10 py-14 lg:grid-cols-12 lg:items-center">
+      <div class="lg:col-span-3">
+        <p class="eyebrow text-concrete-600">{t.home.sheetEyebrow}</p>
+        <h2 id="sheet-title" class="mt-3 text-3xl" style="font-stretch: 80%">{t.home.sheetTitle}</h2>
+      </div>
+      <dl class="divide-rule grid gap-y-8 sm:grid-cols-3 sm:divide-x lg:col-span-9">
+        {
+          stats.map((stat) => (
+            <div class="flex flex-col-reverse gap-2 sm:px-8 sm:first:pl-0">
+              <dt class="eyebrow text-concrete-600">{stat.label}</dt>
+              <dd class="font-mono text-4xl font-medium tracking-tight whitespace-nowrap lg:text-5xl">{stat.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- Son projeler -->
+  <section class="container-site py-20 lg:py-28" aria-labelledby="featured-title">
+    <div class="mb-12 flex flex-wrap items-end justify-between gap-6">
+      <SectionHeading index={2} eyebrow={t.home.featuredEyebrow} title={t.home.featuredTitle} id="featured-title" />
+      <a href={path('projects', lang)} class="btn-outline">{t.common.allProjects}</a>
+    </div>
+    <ProjectList lang={lang} projects={showcase} />
+  </section>
+
+  <!-- Kentsel dönüşüm süreci -->
+  <section class="bg-concrete-100 border-rule border-y" aria-labelledby="process-title">
+    <div class="container-site py-20 lg:py-28">
+      <div class="flex flex-wrap items-end justify-between gap-8">
+        <SectionHeading
+          index={3}
+          eyebrow={t.home.processEyebrow}
+          title={t.home.processTitle}
+          lead={t.home.processLead}
+          id="process-title"
+        />
+        <a href={`${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}`} class="btn-primary">
+          {t.urbanRenewal.applyButton}
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+      <ol class="mt-14 grid gap-px bg-(--color-rule) sm:grid-cols-2 lg:grid-cols-3">
+        {
+          t.urbanRenewal.process.map((step, i) => (
+            <li class="bg-concrete-100 p-6 lg:p-8">
+              <span class="text-signal-600 font-mono text-sm">{String(i + 1).padStart(2, '0')}</span>
+              <h3 class="mt-3 text-xl font-semibold" style="font-stretch: 88%">
+                {step.title}
+              </h3>
+              <p class="text-concrete-700 mt-2 leading-relaxed">{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <ContactCta lang={lang} />
+</BaseLayout>
