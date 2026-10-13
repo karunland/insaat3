@@ -64,7 +64,7 @@ Her sayfanın gövdesi bir kez `views/` altında yazılır; `pages/` altındaki 
 | `/kentsel-donusum/`    | `/en/urban-renewal/`     | Süreç, projeler, **bina/arsa sahibi başvuru formu** (`#basvuru`), SSS |
 | `/projeler/`           | `/en/projects/`          | Tüm projeler; kategori + durum filtresi (URL'e yazılır) |
 | `/projeler/<slug>/`    | `/en/projects/<slug>/`   | Proje detayı                                   |
-| `/iletisim/`           | `/en/contact/`           | Genel iletişim formu (`?topic=contracting` ile konu ön seçilir) |
+| `/iletisim/`           | `/en/contact/`           | Genel iletişim formu, iletişim bilgileri, harita |
 | `/tesekkurler/`        | `/en/thank-you/`         | JS kapalıyken form sonrası yönlendirme (noindex) |
 
 ## Proje ekleme
@@ -98,9 +98,11 @@ beforeAfter:
   beforeAlt: "Dönüşüm öncesi"
   after: ./images/after.jpg
   afterAlt: "Dönüşüm sonrası"
-# Sitede GÖSTERİLMEYEN iç kayıt alanları:
-contractValue: 12500000      # sözleşme bedeli (TL)
-discountRate: 18.5           # kırım oranı (%)
+# İhale bilgileri — sitede GÖSTERİLMEYEN iç kayıt:
+tender:
+  ikn: "2024/123456"         # ihale kayıt numarası (YYYY/numara)
+  contractValue: 12500000    # sözleşme bedeli (TL)
+  discountRate: 18.5         # kırım oranı (%)
 ---
 
 Markdown gövdesi detay sayfasında "Proje hakkında" bölümüdür.
@@ -134,6 +136,9 @@ Gerçek proje eklenince klasörleri silmen yeterli.
 ## Formlar (Web3Forms)
 
 - `ContactForm` (genel) ve `RenewalForm` (kentsel dönüşüm, 3 adım: Mülk → Yapı → İletişim).
+- Proje detayındaki çağrılar iletişim sayfasına `?topic=…&project=<slug>` ile gider; formda
+  "İlgili proje" kutusu görünür ve e-postaya `İlgili proje: <Türkçe başlık> (<slug>)` olarak eklenir.
+  Ziyaretçi kutuyu kaldırabilir; bilinmeyen slug yok sayılır. Bağlantı üretmek için `contactPath()` kullan.
 - JS varsa: fetch ile gönderilir, sonuç sayfada gösterilir. JS yoksa: doğrudan Web3Forms'a POST edilir,
   ardından teşekkür sayfasına yönlenir. Adımlı form JS olmadan tek sayfa form olarak çalışır.
 - Alan adları ve seçenek değerleri, sayfa dili ne olursa olsun **Türkçe** gönderilir (e-postayı okuyan ekip için);
@@ -151,6 +156,12 @@ Gerçek proje eklenince klasörleri silmen yeterli.
 | Form adımları   | `scripts/form-stepper.ts`      | Adım başlığına odak, geçersiz alanda ilerlemez, `aria-current="step"` |
 
 Tüm animasyonlar `prefers-reduced-motion: reduce` tercihinde kapanır (`global.css`).
+
+## Harita
+
+İletişim sayfasındaki harita sayfa açılışında harici istek atmaz. `src/config/site.ts` içinde `geo`
+(koordinat) girilirse "Haritayı yükle" butonu OpenStreetMap haritasını yükler; girilmezse adres ve
+"Haritada görüntüle" bağlantısı gösterilir (`mapUrl` boşsa adresten Google Maps araması üretilir).
 
 ## SEO
 
@@ -177,7 +188,8 @@ Her sayfada: başlık/açıklama, canonical, `hreflang` (tr, en, x-default), Ope
 
 Kodda `TODO` ile işaretli:
 
-- [ ] `src/config/site.ts` — gerçek telefon, e-posta, adres, unvan, sosyal medya
+- [ ] `src/config/site.ts` — gerçek telefon, e-posta, adres, harita koordinatı (`geo`), unvan, sosyal medya
+- [ ] Projelerin ihale bilgileri (`tender.ikn`, bedel, kırım) — isteğe bağlı iç kayıt
 - [ ] `.env` — `SITE_URL`, `PUBLIC_WEB3FORMS_ACCESS_KEY`
 - [ ] Gerçek proje fotoğrafları (aynı dosya adlarıyla)
 - [ ] Bilinmeyen işveren / konum alanları (proje `tr.md`/`en.md` dosyalarında)

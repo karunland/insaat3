@@ -61,11 +61,20 @@ const projects = defineCollection({
         /** Gerçek olmayan, gösterim amaçlı içerik. Sayfada "Örnek" rozeti ve uyarı çıkar. */
         isExample: z.boolean().default(false),
 
-        // --- İç kayıt alanları: sitede HİÇBİR YERDE gösterilmez. ---
-        /** Sözleşme bedeli (TL). */
-        contractValue: z.number().positive().optional(),
-        /** İhale kırım oranı (%). */
-        discountRate: z.number().min(0).max(100).optional(),
+        /** İhale bilgileri — iç kayıt; sitede HİÇBİR YERDE gösterilmez. */
+        tender: z
+          .object({
+            /** İhale kayıt numarası, ör. "2024/123456". */
+            ikn: z
+              .string()
+              .regex(/^\d{4}\/\d+$/, 'İKN "YYYY/numara" biçiminde olmalı (ör. 2024/123456).')
+              .optional(),
+            /** Sözleşme bedeli (TL). */
+            contractValue: z.number().positive().optional(),
+            /** Kırım oranı (%). */
+            discountRate: z.number().min(0).max(100).optional(),
+          })
+          .optional(),
       })
       .refine((data) => !data.beforeAfter || data.category === 'kentsel-donusum', {
         error: 'beforeAfter yalnızca "kentsel-donusum" kategorisindeki projelerde kullanılabilir.',

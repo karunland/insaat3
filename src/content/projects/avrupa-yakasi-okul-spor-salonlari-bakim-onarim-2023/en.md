@@ -23,8 +23,10 @@ gallery:
   - src: ./images/05.jpg
   - src: ./images/06.jpg
 # Internal record — never shown on the site:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 Maintenance and repair works were carried out throughout 2023 on school sports halls and municipal properties on the European Side.

@@ -2,11 +2,12 @@
 /**
  * Sayfa sonlarındaki iletişim çağrısı (CTA).
  *  - general:     genel iletişim + kentsel dönüşüm başvurusu
- *  - contracting: taahhüt projesi detayından → iletişim formu (konu ön seçili)
- *  - renewal:     kentsel dönüşüm projesi detayından → başvuru formu
+ *  - contracting: taahhüt projesi detayından → iletişim formu (konu + proje ön seçili)
+ *  - renewal:     kentsel dönüşüm projesi detayından → iletişim formu (konu + proje ön seçili)
+ *                 ve bina/arsa sahipleri için başvuru formu
  */
 import type { Lang } from '@/i18n/config';
-import { path, RENEWAL_FORM_ID } from '@/i18n/routes';
+import { contactPath, path, RENEWAL_FORM_ID } from '@/i18n/routes';
 import { useTranslations } from '@/i18n/utils';
 import { site, telHref } from '@/config/site';
 import DimensionLine from './DimensionLine.astro';
@@ -14,32 +15,39 @@ import DimensionLine from './DimensionLine.astro';
 interface Props {
   lang: Lang;
   variant?: 'general' | 'contracting' | 'renewal';
+  /** Proje detayından çağrıldığında projenin slug'ı: iletişim formuna aktarılır. */
+  project?: string;
 }
 
-const { lang, variant = 'general' } = Astro.props;
+const { lang, variant = 'general', project } = Astro.props;
 const t = useTranslations(lang);
 
 const renewalHref = `${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}`;
-const contactHref = path('contact', lang);
 
 const content = {
   general: {
     title: t.cta.title,
     text: t.cta.text,
-    primary: { href: contactHref, label: t.cta.primary },
+    primary: { href: contactPath(lang), label: t.cta.primary },
     secondary: { href: renewalHref, label: t.cta.secondary },
   },
   contracting: {
     title: t.project.ctaContractingTitle,
     text: t.project.ctaContractingText,
-    primary: { href: `${contactHref}?topic=contracting`, label: t.cta.primary },
+    primary: {
+      href: contactPath(lang, { topic: 'contracting', project }),
+      label: project ? t.project.ctaAskAbout : t.cta.primary,
+    },
     secondary: undefined,
   },
   renewal: {
     title: t.project.ctaRenewalTitle,
     text: t.project.ctaRenewalText,
-    primary: { href: renewalHref, label: t.project.ctaRenewalButton },
-    secondary: { href: `${contactHref}?topic=renewal`, label: t.cta.primary },
+    primary: {
+      href: contactPath(lang, { topic: 'renewal', project }),
+      label: project ? t.project.ctaAskAbout : t.cta.primary,
+    },
+    secondary: { href: renewalHref, label: t.project.ctaRenewalButton },
   },
 }[variant];
 ---

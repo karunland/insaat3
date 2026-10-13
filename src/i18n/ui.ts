@@ -105,6 +105,7 @@ const tr = {
     ctaRenewalText:
       'Bina veya arsa sahibiyseniz kısa başvuru formunu doldurun; ön değerlendirme için size dönelim.',
     ctaRenewalButton: 'Başvuru formuna git',
+    ctaAskAbout: 'Bu proje hakkında bilgi alın',
   },
 
   lightbox: {
@@ -309,6 +310,9 @@ const tr = {
     formTitle: 'Mesaj gönderin',
     renewalBoxTitle: 'Bina veya arsa sahibi misiniz?',
     renewalBoxText: 'Kentsel dönüşüm için hazırladığımız adım adım başvuru formunu kullanın.',
+    mapTitle: 'Konum',
+    mapLoad: 'Haritayı yükle',
+    mapNotice: 'Harita, tıkladığınızda OpenStreetMap üzerinden yüklenir.',
   },
 
   forms: {
@@ -337,6 +341,8 @@ const tr = {
       other: 'Diğer',
     },
     message: 'Mesajınız',
+    relatedProject: 'İlgili proje',
+    removeProject: 'Kaldır',
     // Kentsel dönüşüm başvuru formu
     renewal: {
       step1: 'Mülk',
@@ -502,6 +508,7 @@ const en: Dictionary = {
     ctaRenewalText:
       "If you own a building or a plot, fill in the short application form and we'll get back to you for a preliminary assessment.",
     ctaRenewalButton: 'Go to the application form',
+    ctaAskAbout: 'Ask about this project',
   },
 
   lightbox: {
@@ -701,6 +708,9 @@ const en: Dictionary = {
     formTitle: 'Send a message',
     renewalBoxTitle: 'Do you own a building or a plot?',
     renewalBoxText: 'Use our step-by-step urban renewal application form.',
+    mapTitle: 'Location',
+    mapLoad: 'Load map',
+    mapNotice: 'The map is loaded from OpenStreetMap when you click.',
   },
 
   forms: {
@@ -728,6 +738,8 @@ const en: Dictionary = {
       other: 'Other',
     },
     message: 'Your message',
+    relatedProject: 'Related project',
+    removeProject: 'Remove',
     renewal: {
       step1: 'Property',
       step2: 'Building',

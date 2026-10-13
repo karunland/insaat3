@@ -30,5 +30,20 @@ export function projectPath(slug: string, lang: Lang): string {
   return `${routes.projects[lang]}${slug}/`;
 }
 
+/**
+ * İletişim sayfası bağlantısı. `topic` konu seçimini, `project` ise formdaki
+ * "İlgili proje" alanını önceden doldurur (bkz. ContactForm.astro).
+ */
+export function contactPath(
+  lang: Lang,
+  options: { topic?: 'contracting' | 'renewal' | 'partnership' | 'other'; project?: string } = {},
+): string {
+  const params = new URLSearchParams();
+  if (options.topic) params.set('topic', options.topic);
+  if (options.project) params.set('project', options.project);
+  const query = params.toString();
+  return query ? `${routes.contact[lang]}?${query}` : routes.contact[lang];
+}
+
 /** Kentsel dönüşüm başvuru formunun çapası (sayfa içi bağlantılar için). */
 export const RENEWAL_FORM_ID = 'basvuru';

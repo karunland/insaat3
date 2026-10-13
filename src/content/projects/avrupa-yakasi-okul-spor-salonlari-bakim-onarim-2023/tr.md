@@ -23,8 +23,10 @@ gallery:
   - src: ./images/05.jpg
   - src: ./images/06.jpg
 # İç kayıt — sitede gösterilmez:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 Avrupa Yakası'nda bulunan okul spor salonları ve belediye mülklerinde 2023 yılı boyunca bakım ve onarım işleri gerçekleştirildi.

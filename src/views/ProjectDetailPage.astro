@@ -9,7 +9,7 @@ import BeforeAfter from '@/components/projects/BeforeAfter.astro';
 import ContactCta from '@/components/ui/ContactCta.astro';
 import SectionHeading from '@/components/ui/SectionHeading.astro';
 import DimensionLine from '@/components/ui/DimensionLine.astro';
-import { path, RENEWAL_FORM_ID, type Alternates } from '@/i18n/routes';
+import { contactPath, path, type Alternates } from '@/i18n/routes';
 import { format, useTranslations } from '@/i18n/utils';
 import type { Project } from '@/lib/projects';
 
@@ -26,7 +26,8 @@ const { Content } = await render(project);
 
 const isRenewal = data.category === 'kentsel-donusum';
 const categoryHref = path(isRenewal ? 'urbanRenewal' : 'contracting', lang);
-const ctaHref = isRenewal ? `${path('urbanRenewal', lang)}#${RENEWAL_FORM_ID}` : `${path('contact', lang)}?topic=contracting`;
+// Çağrı, iletişim formuna konu ve proje bilgisiyle gider (formda "İlgili proje" olarak görünür).
+const ctaHref = contactPath(lang, { topic: isRenewal ? 'renewal' : 'contracting', project: project.slug });
 
 const specs = [
   { label: t.project.client, value: data.client },
@@ -143,7 +144,7 @@ const gallery = data.gallery.map((image, i) => ({
           </dl>
           <div class="border border-t-0 border-current/20 p-5">
             <a href={ctaHref} class="btn-primary w-full">
-              {isRenewal ? t.project.ctaRenewalButton : t.nav.cta}
+              {t.project.ctaAskAbout}
               <span aria-hidden="true">→</span>
             </a>
           </div>
@@ -175,7 +176,7 @@ const gallery = data.gallery.map((image, i) => ({
     }
   </article>
 
-  <ContactCta lang={lang} variant={isRenewal ? 'renewal' : 'contracting'} />
+  <ContactCta lang={lang} variant={isRenewal ? 'renewal' : 'contracting'} project={project.slug} />
 
   {
     related.length > 0 && (

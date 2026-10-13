@@ -5,7 +5,7 @@
 import type { Lang } from '@/i18n/config';
 import { path, type RouteKey } from '@/i18n/routes';
 import { useTranslations } from '@/i18n/utils';
-import { site, telHref } from '@/config/site';
+import { addressLine, site, telHref } from '@/config/site';
 import Logo from './Logo.astro';
 
 interface Props {
@@ -27,7 +27,6 @@ const links: { key: RouteKey; label: string }[] = [
 ];
 
 const social = Object.entries(site.social).filter(([, url]) => url);
-const addressLine = [site.address.street, site.address.district, site.address.city].filter(Boolean).join(', ');
 ---
 
 <footer class="bg-concrete-900 text-concrete-200 blueprint-grid-inverse">
@@ -64,7 +63,7 @@ const addressLine = [site.address.street, site.address.district, site.address.ci
       </p>
       <p>
         <span class="eyebrow text-concrete-400 block">{t.contact.address}</span>
-        <span class="text-paper">{addressLine}</span>
+        <span class="text-paper">{addressLine()}</span>
       </p>
       {
         social.length > 0 && (

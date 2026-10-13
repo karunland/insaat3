@@ -56,6 +56,7 @@ const organization = {
   email: site.email,
   description: t.meta.defaultDescription,
   areaServed: { '@type': 'City', name: 'İstanbul' },
+  ...(site.geo ? { location: { '@type': 'Place', geo: { '@type': 'GeoCoordinates', latitude: site.geo.lat, longitude: site.geo.lng } } } : {}),
   address: {
     '@type': 'PostalAddress',
     ...(address.street ? { streetAddress: address.street } : {}),

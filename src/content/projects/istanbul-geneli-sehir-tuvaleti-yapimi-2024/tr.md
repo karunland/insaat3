@@ -24,8 +24,10 @@ gallery:
   - src: ./images/06.jpg
 featured: true
 # İç kayıt — sitede gösterilmez:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 İstanbul genelinde park ve açık yeşil alanlarda yeni şehir tuvaletleri inşa edildi, mevcut olanlar revize edildi.

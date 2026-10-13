@@ -1,0 +1,75 @@
+---
+/**
+ * Ofis konumu haritası.
+ *
+ * Sayfa açılışında harici bir servise istek atılmaz (performans ve KVKK):
+ * koordinat (site.geo) tanımlıysa ziyaretçi "Haritayı yükle"ye basınca
+ * OpenStreetMap gömülü haritası yüklenir. Koordinat yoksa yalnızca adres ve
+ * "Haritada görüntüle" bağlantısı gösterilir.
+ */
+import type { Lang } from '@/i18n/config';
+import { useTranslations } from '@/i18n/utils';
+import { addressLine, mapHref, site } from '@/config/site';
+
+interface Props {
+  lang: Lang;
+  class?: string;
+}
+
+const { lang, class: className } = Astro.props;
+const t = useTranslations(lang);
+
+const embedSrc = site.geo
+  ? (() => {
+      const { lat, lng } = site.geo;
+      const bbox = [lng - 0.008, lat - 0.005, lng + 0.008, lat + 0.005].join(',');
+      return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}`;
+    })()
+  : undefined;
+---
+
+<section class={className} aria-labelledby="map-title">
+  <h2 id="map-title" class="eyebrow bg-ink text-paper px-5 py-3">{t.contact.mapTitle}</h2>
+  <div
+    class="blueprint-grid border-concrete-300 relative flex aspect-[4/3] flex-col items-center justify-center gap-4 border border-t-0 p-6 text-center"
+    data-map
+    data-src={embedSrc}
+    data-title={`${site.name} — ${t.contact.mapTitle}`}
+  >
+    <!-- Nişangâh: teknik çizimdeki konum işareti -->
+    <svg viewBox="0 0 48 48" class="text-signal-600 size-12" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+      <circle cx="24" cy="24" r="10"></circle>
+      <circle cx="24" cy="24" r="2" fill="currentColor"></circle>
+      <path d="M24 2v12M24 34v12M2 24h12M34 24h12"></path>
+    </svg>
+    <p class="max-w-xs font-medium">{addressLine()}</p>
+    <div class="flex flex-wrap justify-center gap-3">
+      {
+        embedSrc && (
+          <button type="button" class="btn-dark min-h-11" data-map-load>
+            {t.contact.mapLoad}
+          </button>
+        )
+      }
+      <a href={mapHref()} class="btn-outline min-h-11" target="_blank" rel="noopener">
+        {t.contact.map} <span class="sr-only">{t.a11y.opensInNewTab}</span>
+      </a>
+    </div>
+    {embedSrc && <p class="text-concrete-600 text-xs">{t.contact.mapNotice}</p>}
+  </div>
+</section>
+
+<script>
+  for (const box of document.querySelectorAll<HTMLElement>('[data-map]')) {
+    box.querySelector('[data-map-load]')?.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = box.dataset.src ?? '';
+      iframe.title = box.dataset.title ?? '';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer-when-downgrade';
+      iframe.className = 'absolute inset-0 size-full border-0';
+      box.replaceChildren(iframe);
+      iframe.focus();
+    });
+  }
+</script>

@@ -23,8 +23,10 @@ gallery:
   - src: ./images/05.jpg
   - src: ./images/06.jpg
 # İç kayıt — sitede gösterilmez:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 İstanbul Üniversitesi-Cerrahpaşa Veteriner Fakültesi'nin ihtiyaçları doğrultusunda prefabrik bir ek bina inşa edildi.

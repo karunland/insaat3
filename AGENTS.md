@@ -28,6 +28,7 @@ See README.md (Turkish) for full structure. Key points:
 - Page bodies live in `src/views/*.astro` and take a `lang` prop; `src/pages/` files are thin wrappers (one per language). Localized paths are in `src/i18n/routes.ts`.
 - All UI copy is in `src/i18n/ui.ts`; the EN dictionary is typed against TR, so missing keys fail `astro check`.
 - Projects: `src/content/projects/<slug>/{tr,en}.md` + shared `images/`. Access them through `src/lib/projects.ts`, never `getCollection` directly (it parses ids and checks TR/EN consistency).
-- `contractValue` and `discountRate` must never be rendered.
+- The `tender` group (İKN, contract value, discount rate) is internal and must never be rendered.
+- Link to the contact page with `contactPath(lang, { topic, project })` so the form can prefill the topic and related project.
 - No UI framework: client behaviour is vanilla TS in `src/scripts/` or component `<script>` tags, and must respect `prefers-reduced-motion`.
 - Run `npm run build` (includes `astro check`) before finishing a change.

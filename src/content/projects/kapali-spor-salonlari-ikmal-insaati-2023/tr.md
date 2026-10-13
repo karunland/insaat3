@@ -24,8 +24,10 @@ gallery:
   - src: ./images/05.jpg
   - src: ./images/06.jpg
 # İç kayıt — sitede gösterilmez:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 Daha önce başlanmış ancak tamamlanamamış kapalı spor salonu inşaatlarının ikmal işleri üstlenildi.

@@ -2,10 +2,11 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHeader from '@/components/ui/PageHeader.astro';
 import ContactForm from '@/components/forms/ContactForm.astro';
+import MapEmbed from '@/components/ui/MapEmbed.astro';
 import type { Lang } from '@/i18n/config';
 import { path, RENEWAL_FORM_ID, routes } from '@/i18n/routes';
 import { useTranslations } from '@/i18n/utils';
-import { site, telHref } from '@/config/site';
+import { addressLine, site, telHref } from '@/config/site';
 
 interface Props {
   lang: Lang;
@@ -13,7 +14,6 @@ interface Props {
 
 const { lang } = Astro.props;
 const t = useTranslations(lang);
-const addressLine = [site.address.street, site.address.district, site.address.city].filter(Boolean).join(', ');
 ---
 
 <BaseLayout lang={lang} alternates={routes.contact} title={t.contact.title} description={t.contact.description}>
@@ -42,18 +42,13 @@ const addressLine = [site.address.street, site.address.district, site.address.ci
           <div class="py-5">
             <dt class="eyebrow text-concrete-500">{t.contact.address}</dt>
             <dd class="mt-1 text-lg">
-              <address class="not-italic">{addressLine}</address>
-              {
-                site.mapUrl && (
-                  <a href={site.mapUrl} class="link mt-2 inline-block text-sm" target="_blank" rel="noopener">
-                    {t.contact.map} <span class="sr-only">{t.a11y.opensInNewTab}</span>
-                  </a>
-                )
-              }
+              <address class="not-italic">{addressLine()}</address>
             </dd>
           </div>
         </dl>
       </section>
+
+      <MapEmbed lang={lang} />
 
       <section class="bg-concrete-900 text-paper blueprint-grid-inverse p-6 lg:p-8" aria-labelledby="renewal-box-title">
         <p class="eyebrow text-signal-300">{t.nav.urbanRenewal}</p>

@@ -24,8 +24,10 @@ gallery:
   - src: ./images/06.jpg
 featured: true
 # Internal record — never shown on the site:
-# contractValue: 0     # Sözleşme bedeli (TL)
-# discountRate: 0      # Kırım oranı (%)
+# tender:
+#   ikn: "2024/123456"     # İhale kayıt numarası
+#   contractValue: 0        # Sözleşme bedeli (TL)
+#   discountRate: 0         # Kırım oranı (%)
 ---
 
 Miscellaneous major repair works are being carried out on service buildings of the Istanbul Water and Sewerage Administration (İSKİ) on the European Side, in line with the needs defined by the authority.
